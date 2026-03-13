@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <html>
 <head>
-    <title>Sửa Thông Tin Thuốc</title>
+    <title>Cập Nhật Thông Tin Thuốc</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,74 +24,67 @@
         }
         h1 {
             color: #333;
+            text-align: center;
             margin-bottom: 25px;
             font-size: 1.8em;
-            border-bottom: 2px solid #71b7e6;
+            border-bottom: 2px solid #eee;
             padding-bottom: 10px;
         }
-        .input-group {
-            margin-bottom: 18px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        .input-group input[type="text"],
-        .input-group input[type="number"],
-        .input-group input[type="date"],
-        .input-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        .input-group input:focus, .input-group select:focus {
-            border-color: #9b59b6;
-            outline: none;
-        }
-        .save-btn {
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        .input-group input, .input-group select {
             width: 100%;
             padding: 12px;
-            border: none;
-            border-radius: 6px;
-            background-color: #71b7e6;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .input-group input:focus {
+            border-color: #9b59b6;
+            outline: none;
+            box-shadow: 0 0 5px rgba(155, 89, 182, 0.2);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #27ae60;
             color: white;
-            font-size: 1.1em;
-            font-weight: bold;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 15px;
-        }
-        .save-btn:hover {
-            background-color: #5a9fd6;
-        }
-        .back-link {
-            display: block;
-            margin-top: 20px;
-            text-align: center;
-            color: #9b59b6;
-            text-decoration: none;
             font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            background: #219150;
+        }
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        .btn-back:hover {
+            color: #34495e;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 <div class="form-container">
-    <h1>✏️ Sửa Thông Tin Thuốc (ID: ${thuocToEdit.id})</h1>
+    <h1><i class="fas fa-edit"></i> Sửa Thông Tin</h1>
 
-    <p style="color: red; font-weight: bold;">${error}</p>
-
-    <form action="<%= request.getContextPath() %>/edit" method="post">
-
+    <form action="edit" method="post">
         <input type="hidden" name="id" value="${thuocToEdit.id}">
 
         <div class="input-group">
             <label>Tên Thuốc:</label>
-            <input type="text" name="ten" required value="${thuocToEdit.tenThuoc}">
+            <input type="text" name="ten" value="${thuocToEdit.tenThuoc}" required placeholder="Nhập tên thuốc">
         </div>
 
         <div class="input-group">
@@ -106,19 +99,20 @@
 
         <div class="input-group">
             <label>Số lượng tồn:</label>
-            <input type="number" name="soLuong" required min="0" value="${thuocToEdit.soLuongTon}">
+            <input type="number" name="soLuong" value="${thuocToEdit.soLuongTon}" required min="0">
         </div>
 
         <div class="input-group">
             <label>Hạn sử dụng:</label>
-            <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="hanSuDungFormatted" />
-            <input type="date" name="hanSuDung" required value="${hanSuDungFormatted}">
+            <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="formattedDate" />
+            <input type="date" name="hanSuDung" value="${formattedDate}" required>
         </div>
 
-        <input type="submit" value="Lưu Thay Đổi" class="save-btn">
+        <button type="submit" class="btn-submit">CẬP NHẬT NGAY</button>
+        <a href="thuoc" class="btn-back">← Quay lại danh sách</a>
     </form>
-
-    <a href="<%= request.getContextPath() %>/thuoc" class="back-link">← Hủy và Quay lại</a>
 </div>
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

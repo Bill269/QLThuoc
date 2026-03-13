@@ -29,7 +29,6 @@ public class ThuocAddServlet extends HttpServlet {
         }
 
         req.setAttribute("pageTitle", "Thêm Thuốc Mới");
-
         req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
     }
 
@@ -38,6 +37,10 @@ public class ThuocAddServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
 
         User currentUser = (User) req.getSession().getAttribute("currentUser");
+        if (currentUser == null || !"ADMIN".equals(currentUser.getNhomQuyen())) {
+            resp.sendRedirect(req.getContextPath() + "/thuoc");
+            return;
+        }
 
         try {
             String tenThuoc = req.getParameter("ten");
@@ -45,21 +48,22 @@ public class ThuocAddServlet extends HttpServlet {
             int soLuongTon = Integer.parseInt(req.getParameter("soLuong"));
             Date hanSuDung = dateFormat.parse(req.getParameter("hanSuDung"));
 
-            Thuoc newThuoc = new Thuoc(null, tenThuoc, loaiThuoc, soLuongTon, hanSuDung);
+
+            Thuoc newThuoc = new Thuoc(tenThuoc, loaiThuoc, soLuongTon, hanSuDung);
+
             repository.add(newThuoc);
 
+            // Thêm thành công thì quay về danh sách
             resp.sendRedirect(req.getContextPath() + "/thuoc");
 
         } catch (NumberFormatException e) {
-            System.err.println("Lỗi chuyển đổi số lượng: " + e.getMessage());
-            req.setAttribute("error", "Lỗi: Số lượng tồn kho phải là một số nguyên dương.");
-
+            req.setAttribute("error", "Lỗi: Số lượng tồn kho phải là một số nguyên!");
             req.setAttribute("pageTitle", "Thêm Thuốc Mới");
             req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            System.err.println("Lỗi thêm thuốc: " + e.getMessage());
-            req.setAttribute("error", "Lỗi: Dữ liệu không hợp lệ. Vui lòng kiểm tra ngày tháng và các trường khác.");
+            e.printStackTrace();
+            req.setAttribute("error", "Lỗi dữ liệu: Vui lòng kiểm tra lại thông tin nhập vào.");
             req.setAttribute("pageTitle", "Thêm Thuốc Mới");
             req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
         }
