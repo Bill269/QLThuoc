@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import model.User;
 import repository.UserRepository;
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
@@ -14,11 +15,11 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
         String idStr = req.getParameter("id");
+        String txtSearch = req.getParameter("txtSearch");
 
-        if (idStr != null && !idStr.isEmpty()) {
-            try {
+        try {
+            if (idStr != null && !idStr.isEmpty()) {
                 int id = Integer.parseInt(idStr);
-
                 if ("delete".equals(action)) {
                     repo.delete(id);
                     resp.sendRedirect("users");
@@ -32,13 +33,13 @@ public class UserServlet extends HttpServlet {
                         return;
                     }
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Lỗi: ID không phải là số: " + idStr);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-        }
-        req.setAttribute("userList", repo.getAll());
+        } catch (Exception e) { e.printStackTrace(); }
+
+        List<User> userList = repo.searchUsers(txtSearch);
+
+        req.setAttribute("userList", userList);
+        req.setAttribute("lastSearch", txtSearch);
         req.getRequestDispatcher("/WEB-INF/views/quan-ly-user.jsp").forward(req, resp);
     }
 
@@ -59,4 +60,5 @@ public class UserServlet extends HttpServlet {
         }
         resp.sendRedirect("users");
     }
+
 }

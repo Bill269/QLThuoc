@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
+<%-- 1. GỌI HEADER (Sidebar thường nằm trong này) --%>
 <%@ include file="fragment/header.jsp" %>
 
 <style>
@@ -45,11 +46,11 @@
         border-bottom: 1px solid #eee;
     }
     .medicine-table th {
-        background-color: #f8f9fa;
-        color: #333;
+        background-color: #2c3e50;
+        color: white;
         font-weight: 600;
     }
-    .badge {
+    .badge-status {
         display: inline-block;
         padding: 5px 10px;
         border-radius: 4px;
@@ -57,7 +58,7 @@
         font-weight: bold;
         color: white;
         text-align: center;
-        min-width: 100px;
+        min-width: 110px;
     }
 </style>
 
@@ -65,20 +66,48 @@
     <div class="card-grid">
         <div class="card" style="border-top: 5px solid #3498db;">
             <h3 style="font-size: 0.9em; color: #7f8c8d;">TỔNG LOẠI THUỐC</h3>
-            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${fn:length(dsThuoc)}</p>
+            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${fn:length(listThuoc)}</p>
         </div>
         <div class="card" style="border-top: 5px solid #2ecc71;">
             <h3 style="font-size: 0.9em; color: #7f8c8d;">TỔNG TỒN KHO</h3>
-            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;"><fmt:formatNumber value="${totalAmount}" type="number"/></p>
+            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">
+                <fmt:formatNumber value="${totalAmount != null ? totalAmount : 0}" type="number"/>
+            </p>
         </div>
         <div class="card" style="border-top: 5px solid #f39c12;">
             <h3 style="font-size: 0.9em; color: #7f8c8d;">SẮP HẾT HẠN</h3>
-            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${warningCount}</p>
+            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${warningCount != null ? warningCount : 0}</p>
         </div>
         <div class="card" style="border-top: 5px solid #e74c3c;">
             <h3 style="font-size: 0.9em; color: #7f8c8d;">ĐÃ HẾT HẠN</h3>
-            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${expiredCount}</p>
+            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${expiredCount != null ? expiredCount : 0}</p>
         </div>
+    </div>
+
+    <div class="search-bar mb-4 p-4 bg-white shadow-sm rounded border">
+        <form action="thuoc" method="get" class="row g-3">
+            <input type="hidden" name="action" value="list">
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Tìm kiếm tên thuốc</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="txtSearch" class="form-control" placeholder="Nhập tên thuốc..." value="${lastSearch}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Lọc theo loại</label>
+                <select name="selLoai" class="form-select">
+                    <option value="">-- Tất cả loại thuốc --</option>
+                    <c:forEach var="l" items="${listLoai}">
+                        <option value="${l.tenLoai}" ${lastLoai eq l.tenLoai ? 'selected' : ''}>${l.tenLoai}</option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-filter"></i> Lọc</button>
+                <a href="thuoc" class="btn btn-outline-secondary">Xóa</a>
+            </div>
+        </form>
     </div>
 
     <div class="table-container">
@@ -95,44 +124,65 @@
             </tr>
             </thead>
             <tbody>
-            <c:forEach var="thuoc" items="${dsThuoc}">
+            <c:forEach var="thuoc" items="${listThuoc}">
                 <tr>
                     <td>#${thuoc.id}</td>
-                    <td><strong>${thuoc.tenThuoc}</strong></td>
-                    <td><span style="background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">${thuoc.loaiThuoc}</span></td>
-                    <td><fmt:formatNumber value="${thuoc.soLuongTon}" type="number"/></td>
+                    <td><strong style="color: #2c3e50;">${thuoc.tenThuoc}</strong></td>
+                    <td><span style="background: #f1f2f6; padding: 4px 10px; border-radius: 20px; font-size: 0.85em;">${thuoc.loaiThuoc}</span></td>
+                    <td class="fw-bold"><fmt:formatNumber value="${thuoc.soLuongTon}" type="number"/></td>
                     <td><fmt:formatDate value="${thuoc.hanSuDung}" pattern="dd/MM/yyyy"/></td>
                     <td>
-                        <jsp:useBean id="today" class="java.util.Date" />
-                        <c:set var="diff" value="${thuoc.hanSuDung.time - today.time}" />
-                        <c:set var="daysLeft" value="${diff / (1000 * 60 * 60 * 24)}" />
+                            <%-- LOGIC TÍNH TOÁN NGÀY HẾT HẠN CHUẨN --%>
+                        <c:set var="nowTime" value="<%= new java.util.Date().getTime() %>" />
+                        <c:set var="expiryTime" value="${thuoc.hanSuDung.time}" />
+                        <c:set var="daysLeft" value="${(expiryTime - nowTime) / (1000 * 60 * 60 * 24)}" />
 
                         <c:choose>
                             <c:when test="${daysLeft < 0}">
-                                <span class="badge" style="background: #e74c3c;">HẾT HẠN</span>
+                                <span class="badge-status" style="background: #e74c3c;">HẾT HẠN</span>
                             </c:when>
                             <c:when test="${daysLeft <= 30}">
-                                <span class="badge" style="background: #f39c12;">SẮP HẾT HẠN</span>
+                                <span class="badge-status" style="background: #f39c12;">SẮP HẾT HẠN</span>
                             </c:when>
                             <c:otherwise>
-                                <span class="badge" style="background: #2ecc71;">CÒN HẠN</span>
+                                <span class="badge-status" style="background: #2ecc71;">CÒN HẠN</span>
                             </c:otherwise>
                         </c:choose>
                     </td>
                     <td>
-                        <div style="display: flex; gap: 5px;">
-                            <a href="detail?id=${thuoc.id}" style="text-decoration: none; background: #3498db; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-eye"></i> Xem</a>
-                            <c:if test="${currentUser.nhomQuyen eq 'ADMIN'}">
-                                <a href="edit?id=${thuoc.id}" style="text-decoration: none; background: #f39c12; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-edit"></i> Sửa</a>
-                                <a href="thuoc?action=delete&id=${thuoc.id}" onclick="return confirm('Xóa thuốc này?')" style="text-decoration: none; background: #e74c3c; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.8em;"><i class="fas fa-trash"></i> Xóa</a>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="thuoc?action=detail&id=${thuoc.id}" class="btn btn-sm btn-info text-white shadow-sm" style="padding: 5px 10px;">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                                <%-- KIỂM TRA QUYỀN ADMIN - TRÁNH LỖI NULL NẾU CHƯA ĐĂNG NHẬP --%>
+                            <c:if test="${not empty currentUser and currentUser.nhomQuyen eq 'ADMIN'}">
+                                <a href="thuoc?action=edit&id=${thuoc.id}" class="btn btn-sm btn-warning text-white shadow-sm" style="padding: 5px 10px;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="thuoc?action=delete&id=${thuoc.id}"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa thuốc này?')"
+                                   class="btn btn-sm btn-danger shadow-sm" style="padding: 5px 10px;">
+                                    <i class="fas fa-trash"></i>
+                                </a>
                             </c:if>
                         </div>
                     </td>
                 </tr>
             </c:forEach>
+
+            <c:if test="${empty listThuoc}">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 50px; color: #bdc3c7;">
+                        <i class="fas fa-search" style="font-size: 3em; display: block; margin-bottom: 15px;"></i>
+                        Không tìm thấy thuốc nào khớp với yêu cầu của bạn.
+                    </td>
+                </tr>
+            </c:if>
             </tbody>
         </table>
     </div>
 </div>
 
+<%-- 2. GỌI FOOTER --%>
 <%@ include file="fragment/footer.jsp" %>

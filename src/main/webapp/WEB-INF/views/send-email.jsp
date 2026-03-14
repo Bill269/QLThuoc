@@ -1,56 +1,60 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
 <%@ include file="fragment/header.jsp" %>
 
-<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; width: 100%;">
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow border-0" style="border-radius: 15px;">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center mb-4" style="color: var(--secondary-blue); font-weight: 700;">
+                        <i class="fas fa-paper-plane me-2"></i> Gửi Thông Báo Email
+                    </h2>
 
-    <div class="form-container" style="max-width: 700px;">
+                    <div class="alert alert-info border-0 shadow-sm mb-4" style="background-color: #f0faff;">
+                        <p class="mb-0 small text-muted">
+                            <strong><i class="fas fa-info-circle me-1"></i> Ghi chú:</strong>
+                            Email sẽ được gửi đi từ tài khoản quản trị hệ thống.
+                        </p>
+                    </div>
 
+                    <form action="<%= request.getContextPath() %>/send-email" method="post">
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 col-form-label fw-bold">Người nhận:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="toRecipients" class="form-control" required
+                                       placeholder="email1@example.com, email2@example.com" value="${param.toRecipients}">
+                            </div>
+                        </div>
 
-        <c:if test="${not empty success}">
-            <p style="color: var(--success); font-weight: bold; padding: 10px; background: #e6fff0; border-radius: 4px; text-align: center; margin-bottom: 15px;">
-                <i class="fas fa-check-circle"></i> ${success}
-            </p>
-        </c:if>
-        <c:if test="${not empty error}">
-            <p class="error-message" style="text-align: center; margin-bottom: 15px;">
-                <i class="fas fa-exclamation-triangle"></i> ${error}
-            </p>
-        </c:if>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 col-form-label fw-bold">Chủ đề:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="subject" class="form-control" required
+                                       placeholder="Nhập tiêu đề email" value="${param.subject}">
+                            </div>
+                        </div>
 
-        <form action="<%= request.getContextPath() %>/send-email" method="post">
+                        <div class="mb-4 row">
+                            <label class="col-sm-3 col-form-label fw-bold">Nội dung:</label>
+                            <div class="col-sm-9">
+                                <textarea name="content" rows="6" class="form-control" required
+                                          placeholder="Nhập nội dung email tại đây...">${param.content}</textarea>
+                            </div>
+                        </div>
 
-            <div style="margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 6px; background-color: #f7f7f7; text-align: left;">
-                <p style="font-weight: bold; color: #333; margin-bottom: 8px;">Ghi chú:</p>
-                <p style="font-size: 0.9em; color: #666;">
-                    Email sẽ được gửi đi từ tài khoản admin!
-                </p>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm py-2">
+                                <i class="fas fa-paper-plane me-2"></i> Gửi Email
+                            </button>
+                            <a href="<%= request.getContextPath() %>/thuoc" class="btn btn-link text-center mt-3 text-decoration-none">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="input-group">
-                <label>Người nhận (TO)</label>
-                <input type="text" name="toRecipients" required placeholder="email1@example.com, email2@example.com"
-                       value="${param.toRecipients}">
-            </div>
-
-            <div class="input-group">
-                <label>Tên chủ đề</label>
-                <input type="text" name="subject" required placeholder="Nhập chủ đề email"
-                       value="${param.subject}">
-            </div>
-
-            <div class="input-group">
-                <label>Nội dung Email</label>
-                <textarea name="content" rows="8" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; transition: border-color 0.3s;">${param.content}</textarea>
-            </div>
-
-            <input type="submit" value="Gửi Email" class="save-btn">
-        </form>
-
-        <a href="<%= request.getContextPath() %>/thuoc" class="back-link" style="margin-top: 20px; display: block; text-align: center; color: #3498db; text-decoration: none;">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
+        </div>
     </div>
 </div>
 

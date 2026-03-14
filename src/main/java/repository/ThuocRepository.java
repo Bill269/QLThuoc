@@ -105,4 +105,28 @@ public class ThuocRepository {
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
+
+    public List<Thuoc> searchThuoc(String ten, String loai) {
+        List<Thuoc> list = new ArrayList<>();
+        String sql = "SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? ";
+        if (loai != null && !loai.isEmpty()) {
+            sql += " AND LOAI_THUOC = ? ";
+        }
+        sql += " ORDER BY ID DESC";
+
+        try (Connection con = helper.DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + (ten == null ? "" : ten) + "%");
+            if (loai != null && !loai.isEmpty()) {
+                ps.setString(2, loai);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToThuoc(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }

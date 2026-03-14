@@ -64,4 +64,20 @@ public class UserRepository {
             ps.executeUpdate();
         }
     }
+    public List<User> searchUsers(String keyword) {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM NGUOIDUNG WHERE TEN_DANG_NHAP LIKE ? ORDER BY ID DESC";
+
+        try (Connection con = helper.DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + (keyword == null ? "" : keyword) + "%");
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new User(rs.getInt("ID"), rs.getString(2), rs.getString(3), rs.getString(4)));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }

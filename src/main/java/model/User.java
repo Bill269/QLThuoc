@@ -6,6 +6,9 @@ public class User {
     private String matKhau;
     private String nhomQuyen;
 
+    public User() {
+    }
+
     public User(int id, String tenDangNhap, String matKhau, String nhomQuyen) {
         this.id = id;
         this.tenDangNhap = tenDangNhap;
