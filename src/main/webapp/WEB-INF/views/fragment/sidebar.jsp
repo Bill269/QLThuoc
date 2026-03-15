@@ -88,7 +88,10 @@
            class="sidebar-link ${fn:contains(request.getRequestURI(), '/ban-hang') ? 'active' : ''}">
             <i class="fas fa-cash-register"></i> <span>Bán Hàng</span>
         </a>
-
+        <a href="${pageContext.request.contextPath}/hoa-don"
+           class="sidebar-link ${param.action eq 'history' ? 'active' : ''}">
+            <i class="fas fa-file-invoice-dollar"></i> <span>Hóa Đơn</span>
+        </a>
         <a href="${pageContext.request.contextPath}/thuoc"
            class="sidebar-link ${fn:contains(request.getRequestURI(), '/thuoc') && !fn:contains(request.getRequestURI(), 'action=add') ? 'active' : ''}">
             <i class="fas fa-list"></i> <span>Danh Sách Thuốc</span>

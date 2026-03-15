@@ -5,7 +5,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.LoaiThuoc;
 import model.Thuoc;
-import model.User;
 import repository.LoaiThuocRepository;
 import repository.ThuocRepository;
 
@@ -17,8 +16,8 @@ import java.util.List;
 @WebServlet("/thuoc")
 public class ThuocServlet extends HttpServlet {
     private final ThuocRepository repository = new ThuocRepository();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final LoaiThuocRepository loaiRepo = new LoaiThuocRepository();
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,12 +44,13 @@ public class ThuocServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect("thuoc");
+            resp.sendRedirect("thuoc?error=system_error");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Thiết lập tiếng Việt cho dữ liệu từ Form gửi lên
         req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
 
@@ -62,67 +62,87 @@ public class ThuocServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect("thuoc?error=post_failed");
+            resp.sendRedirect("thuoc?error=action_failed");
         }
     }
 
+    // 1. Hiển thị danh sách kèm tìm kiếm và thống kê
     private void listThuoc(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String txtSearch = req.getParameter("txtSearch");
         String selLoai = req.getParameter("selLoai");
 
+        // Gọi hàm search có lọc theo tên và loại
         List<Thuoc> list = repository.searchThuoc(txtSearch, selLoai);
 
+        // Đẩy dữ liệu ra View
         req.setAttribute("listThuoc", list);
-
-        req.setAttribute("totalAmount", repository.getTotalStock());
-        req.setAttribute("warningCount", repository.countWarning());
-        req.setAttribute("expiredCount", repository.countExpired());
-
         req.setAttribute("listLoai", loaiRepo.getAll());
+
+        // Cập nhật các con số thống kê (Badge trên giao diện)
+        req.setAttribute("totalAmount", repository.getTotalStock());
+        req.setAttribute("warningCount", repository.countWarning()); // Sắp hết hạn (30 ngày)
+        req.setAttribute("expiredCount", repository.countExpired()); // Đã hết hạn (Bị khóa)
+
+        // Giữ lại giá trị tìm kiếm cũ trên input
         req.setAttribute("lastSearch", txtSearch);
         req.setAttribute("lastLoai", selLoai);
 
         req.getRequestDispatcher("/WEB-INF/views/danh-sach-thuoc.jsp").forward(req, resp);
     }
 
+    // 2. Form thêm mới
     private void showAddForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        List<LoaiThuoc> listLoai = loaiRepo.getAll();
-        req.setAttribute("listLoai", listLoai);
+        req.setAttribute("listLoai", loaiRepo.getAll());
         req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
     }
 
+    // 3. Form chỉnh sửa
     private void showEditForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int id = Integer.parseInt(req.getParameter("id"));
-        req.setAttribute("thuocToEdit", repository.getById(id));
+        Thuoc t = repository.getById(id);
 
-        List<LoaiThuoc> listLoai = loaiRepo.getAll();
-        req.setAttribute("listLoai", listLoai);
-        req.getRequestDispatcher("/WEB-INF/views/sua-thuoc.jsp").forward(req, resp);
+        if (t != null) {
+            req.setAttribute("thuocToEdit", t);
+            req.setAttribute("listLoai", loaiRepo.getAll());
+            req.getRequestDispatcher("/WEB-INF/views/sua-thuoc.jsp").forward(req, resp);
+        } else {
+            resp.sendRedirect("thuoc");
+        }
     }
 
+    // 4. Xem chi tiết
     private void showDetail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int id = Integer.parseInt(req.getParameter("id"));
         req.setAttribute("thuoc", repository.getById(id));
         req.getRequestDispatcher("/WEB-INF/views/chi-tiet-thuoc.jsp").forward(req, resp);
     }
 
+    // 5. Xử lý xóa
     private void deleteThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         int id = Integer.parseInt(req.getParameter("id"));
         repository.delete(id);
-        resp.sendRedirect("thuoc");
+        resp.sendRedirect("thuoc?msg=deleted");
     }
 
+    // 6. Xử lý thêm mới vào DB
     private void insertThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String ten = req.getParameter("ten");
         String loai = req.getParameter("loai");
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
+        // Kiểm tra logic: Không cho phép thêm thuốc đã hết hạn ngay từ đầu
+        if (hanSD.before(new Date())) {
+            req.setAttribute("error", "Hạn sử dụng không được là ngày trong quá khứ!");
+            showAddForm(req, resp);
+            return;
+        }
+
         repository.add(new Thuoc(ten, loai, soLuong, hanSD));
-        resp.sendRedirect("thuoc");
+        resp.sendRedirect("thuoc?msg=inserted");
     }
 
+    // 7. Xử lý cập nhật DB
     private void updateThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         int id = Integer.parseInt(req.getParameter("id"));
         String ten = req.getParameter("ten");
@@ -131,8 +151,6 @@ public class ThuocServlet extends HttpServlet {
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
         repository.update(new Thuoc(id, ten, loai, soLuong, hanSD));
-        resp.sendRedirect("thuoc");
+        resp.sendRedirect("thuoc?msg=updated");
     }
-
-
 }
