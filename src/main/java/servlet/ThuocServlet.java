@@ -134,4 +134,5 @@ public class ThuocServlet extends HttpServlet {
         resp.sendRedirect("thuoc");
     }
 
+
 }

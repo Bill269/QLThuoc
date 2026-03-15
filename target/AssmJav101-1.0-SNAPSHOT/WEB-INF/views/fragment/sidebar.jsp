@@ -13,7 +13,7 @@
         z-index: 1000;
     }
 
-    /* Khi sidebar bị ẩn/thu nhỏ */
+
     #sidebar.collapsed {
         width: 80px;
     }
@@ -51,7 +51,7 @@
         width: 30px;
     }
 
-    /* Ẩn chữ khi thu nhỏ */
+
     #sidebar.collapsed .sidebar-link span {
         display: none;
     }
@@ -84,6 +84,11 @@
     </div>
 
     <div class="flex-column nav">
+        <a href="${pageContext.request.contextPath}/ban-hang"
+           class="sidebar-link ${fn:contains(request.getRequestURI(), '/ban-hang') ? 'active' : ''}">
+            <i class="fas fa-cash-register"></i> <span>Bán Hàng</span>
+        </a>
+
         <a href="${pageContext.request.contextPath}/thuoc"
            class="sidebar-link ${fn:contains(request.getRequestURI(), '/thuoc') && !fn:contains(request.getRequestURI(), 'action=add') ? 'active' : ''}">
             <i class="fas fa-list"></i> <span>Danh Sách Thuốc</span>

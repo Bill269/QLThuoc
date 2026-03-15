@@ -129,4 +129,62 @@ public class ThuocRepository {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+
+
+    public List<Thuoc> getThuocDangConHang(String search) {
+        List<Thuoc> list = new ArrayList<>();
+        String sql = "SELECT * FROM THUOC WHERE SO_LUONG_TON > 0 AND TEN_THUOC LIKE ? ORDER BY ID DESC";
+        try (Connection con = helper.DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + (search == null ? "" : search) + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToThuoc(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public void banThuoc(int idThuoc, int idUser) {
+        String sqlGiamKho = "UPDATE THUOC SET SO_LUONG_TON = SO_LUONG_TON - 1 WHERE ID = ? AND SO_LUONG_TON > 0 AND HAN_SU_DUNG >= CAST(GETDATE() AS DATE)";
+        String sqlHoaDon = "INSERT INTO HOA_DON (ID_USER, NGAY_LAP) VALUES (?, GETDATE())";
+        String sqlGetId = "SELECT MAX(ID) FROM HOA_DON";
+        String sqlChiTiet = "INSERT INTO CHI_TIET_HOA_DON (ID_HOA_DON, ID_THUOC, SO_LUONG) VALUES (?, ?, 1)";
+
+        Connection con = null;
+        try {
+            con = DbConnector.getConnection();
+            con.setAutoCommit(false);
+
+            PreparedStatement ps1 = con.prepareStatement(sqlGiamKho);
+            ps1.setInt(1, idThuoc);
+            int rowsAffected = ps1.executeUpdate();
+
+            if (rowsAffected > 0) {
+                PreparedStatement ps2 = con.prepareStatement(sqlHoaDon);
+                ps2.setInt(1, idUser);
+                ps2.executeUpdate();
+
+                int idHoaDonVuaTao = 0;
+                try (ResultSet rs = con.prepareStatement(sqlGetId).executeQuery()) {
+                    if (rs.next()) idHoaDonVuaTao = rs.getInt(1);
+                }
+
+                if (idHoaDonVuaTao > 0) {
+                    PreparedStatement ps3 = con.prepareStatement(sqlChiTiet);
+                    ps3.setInt(1, idHoaDonVuaTao);
+                    ps3.setInt(2, idThuoc);
+                    ps3.executeUpdate();
+                    con.commit();
+                }
+            } else {
+                con.rollback();
+            }
+        } catch (Exception e) {
+            if (con != null) try { con.rollback(); } catch (SQLException ex) {}
+            e.printStackTrace();
+        } finally {
+            if (con != null) try { con.close(); } catch (SQLException ex) {}
+        }
+    }
 }
