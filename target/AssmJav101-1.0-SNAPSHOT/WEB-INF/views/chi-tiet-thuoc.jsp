@@ -27,6 +27,12 @@
                             <i class="fas fa-tag" style="color: var(--secondary-blue); margin-right: 8px;"></i>${thuoc.loaiThuoc}
                         </span>
                     </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Giá bán niêm yết</label>
+                        <span style="font-size: 1.3em; color: #e74c3c; font-weight: 700;">
+                    <fmt:formatNumber value="${thuoc.giaBan}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
+                        </span>
+                    </div>
 
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Trạng thái hạn dùng</label>
@@ -83,7 +89,7 @@
                 </a>
 
                 <c:if test="${currentUser.nhomQuyen eq 'ADMIN'}">
-                    <a href="<%= request.getContextPath() %>/edit?id=${thuoc.id}" style="flex: 1; text-align: center; padding: 12px; background: linear-gradient(to right, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: bold;">
+                    <a href="thuoc?action=edit&id=${thuoc.id}" style="flex: 1; text-align: center; padding: 12px; background: linear-gradient(to right, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: bold;">
                         <i class="fas fa-edit"></i> Chỉnh sửa
                     </a>
                 </c:if>

@@ -117,7 +117,7 @@
                 <th>ID</th>
                 <th>Tên Thuốc</th>
                 <th>Loại</th>
-                <th>Số Lượng</th>
+                <th>Giá Bán</th> <th>Số Lượng</th>
                 <th>Hạn Sử Dụng</th>
                 <th>Trạng Thái</th>
                 <th>Thao Tác</th>
@@ -129,10 +129,14 @@
                     <td>#${thuoc.id}</td>
                     <td><strong style="color: #2c3e50;">${thuoc.tenThuoc}</strong></td>
                     <td><span style="background: #f1f2f6; padding: 4px 10px; border-radius: 20px; font-size: 0.85em;">${thuoc.loaiThuoc}</span></td>
+
+                    <td class="fw-bold text-primary">
+                        <fmt:formatNumber value="${thuoc.giaBan}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                    </td>
+
                     <td class="fw-bold"><fmt:formatNumber value="${thuoc.soLuongTon}" type="number"/></td>
                     <td><fmt:formatDate value="${thuoc.hanSuDung}" pattern="dd/MM/yyyy"/></td>
                     <td>
-                            <%-- LOGIC TÍNH TOÁN NGÀY HẾT HẠN CHUẨN --%>
                         <c:set var="nowTime" value="<%= new java.util.Date().getTime() %>" />
                         <c:set var="expiryTime" value="${thuoc.hanSuDung.time}" />
                         <c:set var="daysLeft" value="${(expiryTime - nowTime) / (1000 * 60 * 60 * 24)}" />
@@ -151,18 +155,16 @@
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">
-                            <a href="thuoc?action=detail&id=${thuoc.id}" class="btn btn-sm btn-info text-white shadow-sm" style="padding: 5px 10px;">
+                            <a href="thuoc?action=detail&id=${thuoc.id}" class="btn btn-sm btn-info text-white shadow-sm">
                                 <i class="fas fa-eye"></i>
                             </a>
-
-                                <%-- KIỂM TRA QUYỀN ADMIN - TRÁNH LỖI NULL NẾU CHƯA ĐĂNG NHẬP --%>
                             <c:if test="${not empty currentUser and currentUser.nhomQuyen eq 'ADMIN'}">
-                                <a href="thuoc?action=edit&id=${thuoc.id}" class="btn btn-sm btn-warning text-white shadow-sm" style="padding: 5px 10px;">
+                                <a href="thuoc?action=edit&id=${thuoc.id}" class="btn btn-sm btn-warning text-white shadow-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="thuoc?action=delete&id=${thuoc.id}"
                                    onclick="return confirm('Bạn có chắc chắn muốn xóa thuốc này?')"
-                                   class="btn btn-sm btn-danger shadow-sm" style="padding: 5px 10px;">
+                                   class="btn btn-sm btn-danger shadow-sm">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </c:if>
@@ -170,15 +172,6 @@
                     </td>
                 </tr>
             </c:forEach>
-
-            <c:if test="${empty listThuoc}">
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 50px; color: #bdc3c7;">
-                        <i class="fas fa-search" style="font-size: 3em; display: block; margin-bottom: 15px;"></i>
-                        Không tìm thấy thuốc nào khớp với yêu cầu của bạn.
-                    </td>
-                </tr>
-            </c:if>
             </tbody>
         </table>
     </div>

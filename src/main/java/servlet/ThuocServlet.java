@@ -124,21 +124,22 @@ public class ThuocServlet extends HttpServlet {
         resp.sendRedirect("thuoc?msg=deleted");
     }
 
-    // 6. Xử lý thêm mới vào DB
     private void insertThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         String ten = req.getParameter("ten");
-        String loai = req.getParameter("loai");
+        String loai = req.getParameter("loai"); // Lấy String trực tiếp
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
+        float gia = Float.parseFloat(req.getParameter("giaBan")); // Lấy giá bán
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        // Kiểm tra logic: Không cho phép thêm thuốc đã hết hạn ngay từ đầu
+        // Kiểm tra logic hạn dùng
         if (hanSD.before(new Date())) {
             req.setAttribute("error", "Hạn sử dụng không được là ngày trong quá khứ!");
             showAddForm(req, resp);
             return;
         }
 
-        repository.add(new Thuoc(ten, loai, soLuong, hanSD));
+        // Gọi Constructor 5 tham số: (ten, loai, soLuong, hanSD, gia)
+        repository.add(new Thuoc(ten, loai, soLuong, hanSD, gia));
         resp.sendRedirect("thuoc?msg=inserted");
     }
 
@@ -146,11 +147,13 @@ public class ThuocServlet extends HttpServlet {
     private void updateThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         int id = Integer.parseInt(req.getParameter("id"));
         String ten = req.getParameter("ten");
-        String loai = req.getParameter("loai");
+        String loai = req.getParameter("loai"); // Lấy String trực tiếp
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
+        float gia = Float.parseFloat(req.getParameter("giaBan"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        repository.update(new Thuoc(id, ten, loai, soLuong, hanSD));
+        // Gọi Constructor 6 tham số: (id, ten, loai, soLuong, hanSD, gia)
+        repository.update(new Thuoc(id, ten, loai, soLuong, hanSD, gia));
         resp.sendRedirect("thuoc?msg=updated");
     }
 }
