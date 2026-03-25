@@ -9,18 +9,38 @@
         </h2>
 
         <form action="thuoc?action=update" method="post">
-            <%-- Quan trọng: ID để DB biết sửa dòng nào --%>
             <input type="hidden" name="id" value="${thuocToEdit.id}">
 
             <div class="row">
-                <%-- 1. Tên dược phẩm --%>
                 <div class="col-12 mb-3">
                     <label class="form-label fw-bold text-secondary">Tên dược phẩm</label>
                     <input type="text" name="ten" value="${thuocToEdit.tenThuoc}" class="form-control" required>
                 </div>
 
-                <%-- 2. GIÁ BÁN (ĐÃ BỔ SUNG ĐỂ KHỚP VỚI DETAIL) --%>
-                <div class="col-12 mb-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold text-secondary">Loại thuốc</label>
+                    <select name="idLoai" class="form-select">
+                        <c:forEach var="loai" items="${listLoai}">
+                            <option value="${loai.id}" ${thuocToEdit.idLoai == loai.id ? 'selected' : ''}>
+                                    ${loai.tenLoai}
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <%-- BỔ SUNG: Đơn vị tính --%>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold text-secondary">Đơn vị tính</label>
+                    <select name="idDonVi" class="form-select">
+                        <c:forEach var="dv" items="${listDonVi}">
+                            <option value="${dv.id}" ${thuocToEdit.idDonVi == dv.id ? 'selected' : ''}>
+                                    ${dv.tenDonVi}
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Giá bán (VNĐ)</label>
                     <div class="input-group">
                         <input type="number" name="giaBan" value="${thuocToEdit.giaBan}" class="form-control" required min="0">
@@ -28,25 +48,11 @@
                     </div>
                 </div>
 
-                <%-- 3. Loại thuốc --%>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold text-secondary">Loại thuốc</label>
-                    <select name="loai" class="form-select">
-                        <c:forEach var="loai" items="${listLoai}">
-                            <option value="${loai.tenLoai}" ${thuocToEdit.loaiThuoc eq loai.tenLoai ? 'selected' : ''}>
-                                    ${loai.tenLoai}
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
-
-                <%-- 4. Tồn kho --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Tồn kho</label>
                     <input type="number" name="soLuong" value="${thuocToEdit.soLuongTon}" class="form-control" required min="0">
                 </div>
 
-                <%-- 5. Hạn sử dụng --%>
                 <div class="col-12 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
                     <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="fmtD" />

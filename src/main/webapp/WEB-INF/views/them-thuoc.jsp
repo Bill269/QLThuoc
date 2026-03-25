@@ -12,20 +12,20 @@
                 <%-- 1. Tên thuốc --%>
                 <div class="col-12 mb-3">
                     <label class="form-label fw-bold text-secondary">Tên dược phẩm</label>
-                    <input type="text" name="ten" class="form-control form-control-lg" required placeholder="Ví dụ: Panadol Extra">
+                    <input type="text" name="ten" class="form-control form-control-lg" required placeholder="Ví dụ: Decolgen">
                 </div>
 
                 <%-- 2. Loại danh mục --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Loại danh mục</label>
-                    <select name="loai" class="form-select">
+                    <select name="idLoai" class="form-select">
                         <c:forEach var="loai" items="${listLoai}">
-                            <option value="${loai.tenLoai}">${loai.tenLoai}</option>
+                            <option value="${loai.id}">${loai.tenLoai}</option>
                         </c:forEach>
                     </select>
                 </div>
 
-                <%-- 3. BỔ SUNG: GIÁ BÁN (BẮT BUỘC) --%>
+                <%-- 3. Giá bán --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Giá bán (VNĐ)</label>
                     <div class="input-group">
@@ -40,8 +40,18 @@
                     <input type="number" name="soLuong" class="form-control" required min="1" placeholder="Số lượng">
                 </div>
 
-                <%-- 5. Hạn sử dụng --%>
-                <div class="col-md-6 mb-4">
+                <%-- 5. BỔ SUNG: Đơn vị tính --%>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold text-secondary">Đơn vị tính</label>
+                    <select name="idDonVi" class="form-select">
+                        <c:forEach var="dv" items="${listDonVi}">
+                            <option value="${dv.id}">${dv.tenDonVi}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <%-- 6. Hạn sử dụng --%>
+                <div class="col-12 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
                     <input type="date" name="hanSuDung" class="form-control" required>
                 </div>

@@ -16,6 +16,8 @@ public class BanHangServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
+        String search = req.getParameter("txtSearch");
+        if (search == null) search = "";
 
         if ("sell".equals(action)) {
             try {
@@ -23,16 +25,18 @@ public class BanHangServlet extends HttpServlet {
                 User user = (User) req.getSession().getAttribute("currentUser");
                 int userId = (user != null) ? user.getId() : 1;
                 repo.banThuoc(id, userId);
+                req.getSession().setAttribute("message", "Đã bán 1 đơn vị thuốc!");
+                req.getSession().setAttribute("messageType", "success");
             } catch (Exception e) {
-                e.printStackTrace();
+                req.getSession().setAttribute("message", "Lỗi: " + e.getMessage());
+                req.getSession().setAttribute("messageType", "danger");
             }
-            resp.sendRedirect(req.getContextPath() + "/ban-hang");
+            resp.sendRedirect("ban-hang");
             return;
         }
 
 
         // 2. LOGIC BÁN HÀNG GỐC
-        String search = req.getParameter("txtSearch");
         if (search == null) search = "";
 
         req.setAttribute("listThuoc", repo.getThuocDangConHang(search));

@@ -9,7 +9,8 @@
 
     <div class="detail-card" style="background: white; width: 100%; max-width: 650px; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1);">
 
-        <div style="background: linear-gradient(135deg, var(--primary-dark), var(--secondary-blue)); padding: 40px 30px; text-align: center; color: white;">
+        <%-- Header của Card --%>
+        <div style="background: linear-gradient(135deg, #2c3e50, #2980b9); padding: 40px 30px; text-align: center; color: white;">
             <div style="background: rgba(255,255,255,0.2); width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 15px; font-size: 35px;">
                 <i class="fas fa-capsules"></i>
             </div>
@@ -20,24 +21,24 @@
         <div style="padding: 30px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
 
+                <%-- Cột bên trái --%>
                 <div>
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Loại Thuốc</label>
                         <span style="font-size: 1.1em; color: #333; font-weight: 600;">
-                            <i class="fas fa-tag" style="color: var(--secondary-blue); margin-right: 8px;"></i>${thuoc.loaiThuoc}
+                            <i class="fas fa-tag" style="color: #3498db; margin-right: 8px;"></i>${thuoc.loaiThuoc}
                         </span>
                     </div>
+
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Giá bán niêm yết</label>
                         <span style="font-size: 1.3em; color: #e74c3c; font-weight: 700;">
-                    <fmt:formatNumber value="${thuoc.giaBan}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${thuoc.giaBan}" type="currency" currencySymbol="₫" maxFractionDigits="0"/>
                         </span>
                     </div>
 
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Trạng thái hạn dùng</label>
-
-                        <%-- CÁCH TÍNH NGÀY AN TOÀN KHÔNG GÂY LỖI --%>
                         <c:set var="now" value="<%= new java.util.Date() %>" />
                         <c:set var="msPerDay" value="${1000 * 60 * 60 * 24}" />
                         <c:set var="diff" value="${thuoc.hanSuDung.time - now.time}" />
@@ -63,11 +64,16 @@
                     </div>
                 </div>
 
+                <%-- Cột bên phải --%>
                 <div>
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Số lượng trong kho</label>
-                        <span style="font-size: 1.4em; color: var(--primary-dark); font-weight: 800;">
-                            ${thuoc.soLuongTon} <small style="font-size: 0.6em; color: #666;">Đơn vị</small>
+                        <span style="font-size: 1.4em; color: #2c3e50; font-weight: 800;">
+                            ${thuoc.soLuongTon}
+                            <%-- ĐÃ CẬP NHẬT ĐƠN VỊ TÍNH TẠI ĐÂY --%>
+                            <small style="font-size: 0.6em; color: #666; font-weight: normal; background: #ecf0f1; padding: 2px 8px; border-radius: 5px; margin-left: 5px;">
+                                ${thuoc.tenDonVi}
+                            </small>
                         </span>
                     </div>
 
@@ -83,13 +89,14 @@
 
             <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
+            <%-- Các nút điều hướng --%>
             <div style="display: flex; justify-content: center; gap: 15px;">
-                <a href="<%= request.getContextPath() %>/thuoc" style="flex: 1; text-align: center; padding: 12px; background: #f1f2f6; color: #57606f; border-radius: 10px; text-decoration: none; font-weight: bold;">
+                <a href="<%= request.getContextPath() %>/thuoc" style="flex: 1; text-align: center; padding: 12px; background: #f1f2f6; color: #57606f; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s;">
                     <i class="fas fa-chevron-left"></i> Trở về
                 </a>
 
                 <c:if test="${currentUser.nhomQuyen eq 'ADMIN'}">
-                    <a href="thuoc?action=edit&id=${thuoc.id}" style="flex: 1; text-align: center; padding: 12px; background: linear-gradient(to right, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: bold;">
+                    <a href="thuoc?action=edit&id=${thuoc.id}" style="flex: 1; text-align: center; padding: 12px; background: linear-gradient(to right, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s;">
                         <i class="fas fa-edit"></i> Chỉnh sửa
                     </a>
                 </c:if>

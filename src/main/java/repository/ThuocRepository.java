@@ -12,16 +12,23 @@ public class ThuocRepository {
         return new Thuoc(
                 rs.getInt("ID"),
                 rs.getString("TEN_THUOC"),
-                rs.getString("LOAI_THUOC"),
+                rs.getInt("ID_LOAI"),
+                rs.getString("TEN_LOAI"),
                 rs.getInt("SO_LUONG_TON"),
                 rs.getDate("HAN_SU_DUNG"),
-                rs.getFloat("GIA_BAN")
+                rs.getFloat("GIA_BAN"),
+                rs.getInt("ID_DON_VI"),
+                rs.getString("TEN_DON_VI")
         );
     }
 
     public List<Thuoc> getThuocDangConHang(String search) {
         List<Thuoc> list = new ArrayList<>();
-        String sql = "SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? AND SO_LUONG_TON > 0 ORDER BY HAN_SU_DUNG ASC";
+        String sql = "SELECT t.*, l.TEN_LOAI, d.TEN_DON_VI FROM THUOC t " +
+                "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID " +
+                "WHERE t.TEN_THUOC LIKE ? AND t.SO_LUONG_TON > 0 " +
+                "ORDER BY t.HAN_SU_DUNG ASC";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, "%" + (search == null ? "" : search) + "%");
@@ -33,30 +40,30 @@ public class ThuocRepository {
         return list;
     }
 
-    public List<Thuoc> searchThuoc(String ten, String loai) {
+    public List<Thuoc> searchThuoc(String ten, String idLoai) {
         List<Thuoc> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? ");
-        if (loai != null && !loai.isEmpty()) {
-            sql.append(" AND LOAI_THUOC = ? ");
-        }
-        sql.append(" ORDER BY ID DESC");
+        String sql = "SELECT t.*, l.TEN_LOAI, d.TEN_DON_VI FROM THUOC t " +
+                "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID " +
+                "WHERE t.TEN_THUOC LIKE ? ";
+        if (idLoai != null && !idLoai.isEmpty()) sql += " AND t.ID_LOAI = ? ";
+        sql += " ORDER BY t.ID DESC";
 
         try (Connection con = DbConnector.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, "%" + (ten == null ? "" : ten) + "%");
-            if (loai != null && !loai.isEmpty()) {
-                ps.setString(2, loai);
-            }
+            if (idLoai != null && !idLoai.isEmpty()) ps.setInt(2, Integer.parseInt(idLoai));
+
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToThuoc(rs));
-            }
+            while (rs.next()) list.add(mapResultSetToThuoc(rs));
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
     public Thuoc getById(int id) {
-        String sql = "SELECT * FROM THUOC WHERE ID = ?";
+        String sql = "SELECT t.*, l.TEN_LOAI, d.TEN_DON_VI FROM THUOC t " +
+                "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID WHERE t.ID = ?";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -67,28 +74,28 @@ public class ThuocRepository {
     }
 
     public void add(Thuoc t) {
-        String sql = "INSERT INTO THUOC (TEN_THUOC, LOAI_THUOC, SO_LUONG_TON, HAN_SU_DUNG, GIA_BAN) VALUES (?, ?, ?, ?, ?)";
-        try (Connection con = DbConnector.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = "INSERT INTO THUOC (TEN_THUOC, ID_LOAI, SO_LUONG_TON, HAN_SU_DUNG, GIA_BAN, ID_DON_VI) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection con = DbConnector.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
-            ps.setString(2, t.getLoaiThuoc());
+            ps.setInt(2, t.getIdLoai());
             ps.setInt(3, t.getSoLuongTon());
             ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
             ps.setFloat(5, t.getGiaBan());
+            ps.setInt(6, t.getIdDonVi()); // Thêm cột ID đơn vị
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     public void update(Thuoc t) {
-        String sql = "UPDATE THUOC SET TEN_THUOC=?, LOAI_THUOC=?, SO_LUONG_TON=?, HAN_SU_DUNG=?, GIA_BAN=? WHERE ID=?";
-        try (Connection con = DbConnector.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = "UPDATE THUOC SET TEN_THUOC=?, ID_LOAI=?, SO_LUONG_TON=?, HAN_SU_DUNG=?, GIA_BAN=?, ID_DON_VI=? WHERE ID=?";
+        try (Connection con = DbConnector.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
-            ps.setString(2, t.getLoaiThuoc());
+            ps.setInt(2, t.getIdLoai());
             ps.setInt(3, t.getSoLuongTon());
             ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
             ps.setFloat(5, t.getGiaBan());
-            ps.setInt(6, t.getId());
+            ps.setInt(6, t.getIdDonVi());
+            ps.setInt(7, t.getId());
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }

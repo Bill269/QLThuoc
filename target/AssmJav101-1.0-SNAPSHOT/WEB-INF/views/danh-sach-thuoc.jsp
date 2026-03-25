@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<%-- 1. GỌI HEADER (Sidebar thường nằm trong này) --%>
+<%-- 1. GỌI HEADER --%>
 <%@ include file="fragment/header.jsp" %>
 
 <style>
@@ -84,6 +84,7 @@
         </div>
     </div>
 
+    <%-- Thanh tìm kiếm & Lọc --%>
     <div class="search-bar mb-4 p-4 bg-white shadow-sm rounded border">
         <form action="thuoc" method="get" class="row g-3">
             <input type="hidden" name="action" value="list">
@@ -99,17 +100,18 @@
                 <select name="selLoai" class="form-select">
                     <option value="">-- Tất cả loại thuốc --</option>
                     <c:forEach var="l" items="${listLoai}">
-                        <option value="${l.tenLoai}" ${lastLoai eq l.tenLoai ? 'selected' : ''}>${l.tenLoai}</option>
+                        <option value="${l.id}" ${lastLoai eq l.id ? 'selected' : ''}>${l.tenLoai}</option>
                     </c:forEach>
                 </select>
             </div>
             <div class="col-md-3 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-filter"></i> Lọc</button>
-                <a href="thuoc" class="btn btn-outline-secondary">Xóa</a>
+                <a href="thuoc?action=add" class="btn btn-success"><i class="fas fa-plus"></i> Thêm mới</a>
             </div>
         </form>
     </div>
 
+    <%-- Bảng hiển thị --%>
     <div class="table-container">
         <table class="medicine-table">
             <thead>
@@ -117,8 +119,9 @@
                 <th>ID</th>
                 <th>Tên Thuốc</th>
                 <th>Loại</th>
-                <th>Giá Bán</th> <th>Số Lượng</th>
-                <th>Hạn Sử Dụng</th>
+                <th>Giá Bán</th>
+                <th>Số Lượng</th>
+                <th>Đơn Vị Tính</th>
                 <th>Trạng Thái</th>
                 <th>Thao Tác</th>
             </tr>
@@ -128,14 +131,22 @@
                 <tr>
                     <td>#${thuoc.id}</td>
                     <td><strong style="color: #2c3e50;">${thuoc.tenThuoc}</strong></td>
-                    <td><span style="background: #f1f2f6; padding: 4px 10px; border-radius: 20px; font-size: 0.85em;">${thuoc.loaiThuoc}</span></td>
+                    <td>
+                        <span style="background: #f1f2f6; padding: 4px 10px; border-radius: 20px; font-size: 0.85em;">
+                                ${thuoc.loaiThuoc}
+                        </span>
+                    </td>
 
                     <td class="fw-bold text-primary">
                         <fmt:formatNumber value="${thuoc.giaBan}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                     </td>
 
                     <td class="fw-bold"><fmt:formatNumber value="${thuoc.soLuongTon}" type="number"/></td>
-                    <td><fmt:formatDate value="${thuoc.hanSuDung}" pattern="dd/MM/yyyy"/></td>
+
+                    <td class="text-muted" style="font-weight: 500;">
+                        <i class="fas fa-box-open me-1" style="font-size: 0.8em;"></i>${thuoc.tenDonVi}
+                    </td>
+
                     <td>
                         <c:set var="nowTime" value="<%= new java.util.Date().getTime() %>" />
                         <c:set var="expiryTime" value="${thuoc.hanSuDung.time}" />
@@ -155,16 +166,16 @@
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">
-                            <a href="thuoc?action=detail&id=${thuoc.id}" class="btn btn-sm btn-info text-white shadow-sm">
+                            <a href="thuoc?action=detail&id=${thuoc.id}" class="btn btn-sm btn-info text-white shadow-sm" title="Xem chi tiết">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <c:if test="${not empty currentUser and currentUser.nhomQuyen eq 'ADMIN'}">
-                                <a href="thuoc?action=edit&id=${thuoc.id}" class="btn btn-sm btn-warning text-white shadow-sm">
+                                <a href="thuoc?action=edit&id=${thuoc.id}" class="btn btn-sm btn-warning text-white shadow-sm" title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="thuoc?action=delete&id=${thuoc.id}"
                                    onclick="return confirm('Bạn có chắc chắn muốn xóa thuốc này?')"
-                                   class="btn btn-sm btn-danger shadow-sm">
+                                   class="btn btn-sm btn-danger shadow-sm" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </c:if>
