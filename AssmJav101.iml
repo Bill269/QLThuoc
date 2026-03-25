@@ -34,7 +34,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/gmail-sender-1.0.0.jar!/" />
+          <root url="jar://$USER_HOME$/gmail-sender-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

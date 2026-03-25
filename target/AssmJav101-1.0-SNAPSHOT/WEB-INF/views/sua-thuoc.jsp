@@ -9,14 +9,26 @@
         </h2>
 
         <form action="thuoc?action=update" method="post">
+            <%-- Quan trọng: ID để DB biết sửa dòng nào --%>
             <input type="hidden" name="id" value="${thuocToEdit.id}">
 
             <div class="row">
+                <%-- 1. Tên dược phẩm --%>
                 <div class="col-12 mb-3">
                     <label class="form-label fw-bold text-secondary">Tên dược phẩm</label>
                     <input type="text" name="ten" value="${thuocToEdit.tenThuoc}" class="form-control" required>
                 </div>
 
+                <%-- 2. GIÁ BÁN (ĐÃ BỔ SUNG ĐỂ KHỚP VỚI DETAIL) --%>
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-bold text-secondary">Giá bán (VNĐ)</label>
+                    <div class="input-group">
+                        <input type="number" name="giaBan" value="${thuocToEdit.giaBan}" class="form-control" required min="0">
+                        <span class="input-group-text">₫</span>
+                    </div>
+                </div>
+
+                <%-- 3. Loại thuốc --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Loại thuốc</label>
                     <select name="loai" class="form-select">
@@ -28,11 +40,13 @@
                     </select>
                 </div>
 
+                <%-- 4. Tồn kho --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Tồn kho</label>
-                    <input type="number" name="soLuong" value="${thuocToEdit.soLuongTon}" class="form-control" required>
+                    <input type="number" name="soLuong" value="${thuocToEdit.soLuongTon}" class="form-control" required min="0">
                 </div>
 
+                <%-- 5. Hạn sử dụng --%>
                 <div class="col-12 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
                     <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="fmtD" />
@@ -41,8 +55,10 @@
             </div>
 
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-warning py-2 fw-bold text-white">XÁC NHẬN SỬA</button>
-                <a href="thuoc" class="btn btn-link text-secondary text-decoration-none">Quay lại</a>
+                <button type="submit" class="btn btn-warning py-2 fw-bold text-white shadow-sm">
+                    <i class="fas fa-check-circle me-1"></i> XÁC NHẬN SỬA
+                </button>
+                <a href="thuoc" class="btn btn-outline-secondary text-decoration-none py-2">Quay lại danh sách</a>
             </div>
         </form>
     </div>

@@ -14,16 +14,40 @@ public class ThuocRepository {
                 rs.getString("TEN_THUOC"),
                 rs.getString("LOAI_THUOC"),
                 rs.getInt("SO_LUONG_TON"),
-                rs.getDate("HAN_SU_DUNG")
+                rs.getDate("HAN_SU_DUNG"),
+                rs.getFloat("GIA_BAN")
         );
     }
 
-    public List<Thuoc> getAll() {
+    public List<Thuoc> getThuocDangConHang(String search) {
         List<Thuoc> list = new ArrayList<>();
-        String sql = "SELECT * FROM THUOC ORDER BY ID DESC";
+        String sql = "SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? AND SO_LUONG_TON > 0 ORDER BY HAN_SU_DUNG ASC";
         try (Connection con = DbConnector.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + (search == null ? "" : search) + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSetToThuoc(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Thuoc> searchThuoc(String ten, String loai) {
+        List<Thuoc> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? ");
+        if (loai != null && !loai.isEmpty()) {
+            sql.append(" AND LOAI_THUOC = ? ");
+        }
+        sql.append(" ORDER BY ID DESC");
+
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            ps.setString(1, "%" + (ten == null ? "" : ten) + "%");
+            if (loai != null && !loai.isEmpty()) {
+                ps.setString(2, loai);
+            }
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(mapResultSetToThuoc(rs));
             }
@@ -43,26 +67,28 @@ public class ThuocRepository {
     }
 
     public void add(Thuoc t) {
-        String sql = "INSERT INTO THUOC (TEN_THUOC, LOAI_THUOC, SO_LUONG_TON, HAN_SU_DUNG) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO THUOC (TEN_THUOC, LOAI_THUOC, SO_LUONG_TON, HAN_SU_DUNG, GIA_BAN) VALUES (?, ?, ?, ?, ?)";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
             ps.setString(2, t.getLoaiThuoc());
             ps.setInt(3, t.getSoLuongTon());
             ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
+            ps.setFloat(5, t.getGiaBan());
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     public void update(Thuoc t) {
-        String sql = "UPDATE THUOC SET TEN_THUOC = ?, LOAI_THUOC = ?, SO_LUONG_TON = ?, HAN_SU_DUNG = ? WHERE ID = ?";
+        String sql = "UPDATE THUOC SET TEN_THUOC=?, LOAI_THUOC=?, SO_LUONG_TON=?, HAN_SU_DUNG=?, GIA_BAN=? WHERE ID=?";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
             ps.setString(2, t.getLoaiThuoc());
             ps.setInt(3, t.getSoLuongTon());
             ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
-            ps.setInt(5, t.getId());
+            ps.setFloat(5, t.getGiaBan());
+            ps.setInt(6, t.getId());
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -76,109 +102,34 @@ public class ThuocRepository {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    public long getTotalStock() {
-        String sql = "SELECT SUM(SO_LUONG_TON) AS Total FROM THUOC";
-        try (Connection con = DbConnector.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            if (rs.next()) return rs.getLong("Total");
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
-    }
-
-    public long countWarning() {
-        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG >= CAST(GETDATE() AS DATE) AND HAN_SU_DUNG <= DATEADD(day, 30, CAST(GETDATE() AS DATE))";
-        try (Connection con = DbConnector.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            if (rs.next()) return rs.getLong(1);
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
-    }
-
-    public long countExpired() {
-        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG < CAST(GETDATE() AS DATE)";
-        try (Connection con = DbConnector.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            if (rs.next()) return rs.getLong(1);
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
-    }
-
-    public List<Thuoc> searchThuoc(String ten, String loai) {
-        List<Thuoc> list = new ArrayList<>();
-        String sql = "SELECT * FROM THUOC WHERE TEN_THUOC LIKE ? ";
-        if (loai != null && !loai.isEmpty()) {
-            sql += " AND LOAI_THUOC = ? ";
-        }
-        sql += " ORDER BY ID DESC";
-
-        try (Connection con = helper.DbConnector.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, "%" + (ten == null ? "" : ten) + "%");
-            if (loai != null && !loai.isEmpty()) {
-                ps.setString(2, loai);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToThuoc(rs));
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
-
-
-    public List<Thuoc> getThuocDangConHang(String search) {
-        List<Thuoc> list = new ArrayList<>();
-        String sql = "SELECT * FROM THUOC WHERE SO_LUONG_TON > 0 AND TEN_THUOC LIKE ? ORDER BY ID DESC";
-        try (Connection con = helper.DbConnector.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, "%" + (search == null ? "" : search) + "%");
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToThuoc(rs));
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
-
     public void banThuoc(int idThuoc, int idUser) {
-        String sqlGiamKho = "UPDATE THUOC SET SO_LUONG_TON = SO_LUONG_TON - 1 WHERE ID = ? AND SO_LUONG_TON > 0 AND HAN_SU_DUNG >= CAST(GETDATE() AS DATE)";
+        String sqlGiamKho = "UPDATE THUOC SET SO_LUONG_TON = SO_LUONG_TON - 1 " +
+                "WHERE ID = ? AND SO_LUONG_TON > 0 AND HAN_SU_DUNG >= CAST(GETDATE() AS DATE)";
         String sqlHoaDon = "INSERT INTO HOA_DON (ID_USER, NGAY_LAP) VALUES (?, GETDATE())";
-        String sqlGetId = "SELECT MAX(ID) FROM HOA_DON";
         String sqlChiTiet = "INSERT INTO CHI_TIET_HOA_DON (ID_HOA_DON, ID_THUOC, SO_LUONG) VALUES (?, ?, 1)";
 
         Connection con = null;
         try {
             con = DbConnector.getConnection();
             con.setAutoCommit(false);
-
-            PreparedStatement ps1 = con.prepareStatement(sqlGiamKho);
-            ps1.setInt(1, idThuoc);
-            int rowsAffected = ps1.executeUpdate();
-
-            if (rowsAffected > 0) {
-                PreparedStatement ps2 = con.prepareStatement(sqlHoaDon);
-                ps2.setInt(1, idUser);
-                ps2.executeUpdate();
-
-                int idHoaDonVuaTao = 0;
-                try (ResultSet rs = con.prepareStatement(sqlGetId).executeQuery()) {
-                    if (rs.next()) idHoaDonVuaTao = rs.getInt(1);
-                }
-
-                if (idHoaDonVuaTao > 0) {
-                    PreparedStatement ps3 = con.prepareStatement(sqlChiTiet);
-                    ps3.setInt(1, idHoaDonVuaTao);
-                    ps3.setInt(2, idThuoc);
-                    ps3.executeUpdate();
-                    con.commit();
-                }
-            } else {
-                con.rollback();
+            try (PreparedStatement ps1 = con.prepareStatement(sqlGiamKho)) {
+                ps1.setInt(1, idThuoc);
+                if (ps1.executeUpdate() > 0) {
+                    int idHD = -1;
+                    try (PreparedStatement ps2 = con.prepareStatement(sqlHoaDon, Statement.RETURN_GENERATED_KEYS)) {
+                        ps2.setInt(1, idUser);
+                        ps2.executeUpdate();
+                        ResultSet rs = ps2.getGeneratedKeys();
+                        if (rs.next()) idHD = rs.getInt(1);
+                    }
+                    if (idHD > 0) {
+                        try (PreparedStatement ps3 = con.prepareStatement(sqlChiTiet)) {
+                            ps3.setInt(1, idHD); ps3.setInt(2, idThuoc);
+                            ps3.executeUpdate();
+                            con.commit();
+                        }
+                    } else { con.rollback(); }
+                } else { con.rollback(); }
             }
         } catch (Exception e) {
             if (con != null) try { con.rollback(); } catch (SQLException ex) {}
@@ -186,5 +137,29 @@ public class ThuocRepository {
         } finally {
             if (con != null) try { con.close(); } catch (SQLException ex) {}
         }
+    }
+
+    public long getTotalStock() {
+        String sql = "SELECT SUM(SO_LUONG_TON) FROM THUOC";
+        try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public long countWarning() {
+        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG >= CAST(GETDATE() AS DATE) AND HAN_SU_DUNG <= DATEADD(day, 30, CAST(GETDATE() AS DATE))";
+        try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public long countExpired() {
+        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG < CAST(GETDATE() AS DATE)";
+        try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
     }
 }

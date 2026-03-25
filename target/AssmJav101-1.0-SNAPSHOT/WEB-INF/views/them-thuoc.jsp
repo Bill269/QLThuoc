@@ -9,11 +9,13 @@
 
         <form action="thuoc?action=insert" method="post">
             <div class="row">
+                <%-- 1. Tên thuốc --%>
                 <div class="col-12 mb-3">
-                    <label class="form-label fw-bold text-secondary">Tên thuốc</label>
-                    <input type="text" name="ten" class="form-control" required placeholder="Ví dụ: Paracetamol">
+                    <label class="form-label fw-bold text-secondary">Tên dược phẩm</label>
+                    <input type="text" name="ten" class="form-control form-control-lg" required placeholder="Ví dụ: Panadol Extra">
                 </div>
 
+                <%-- 2. Loại danh mục --%>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold text-secondary">Loại danh mục</label>
                     <select name="loai" class="form-select">
@@ -23,20 +25,35 @@
                     </select>
                 </div>
 
+                <%-- 3. BỔ SUNG: GIÁ BÁN (BẮT BUỘC) --%>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold text-secondary">Số lượng</label>
-                    <input type="number" name="soLuong" class="form-control" required min="1">
+                    <label class="form-label fw-bold text-secondary">Giá bán (VNĐ)</label>
+                    <div class="input-group">
+                        <input type="number" name="giaBan" class="form-control" required min="0" step="500" placeholder="0">
+                        <span class="input-group-text">₫</span>
+                    </div>
                 </div>
 
-                <div class="col-12 mb-4">
+                <%-- 4. Số lượng --%>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold text-secondary">Số lượng nhập</label>
+                    <input type="number" name="soLuong" class="form-control" required min="1" placeholder="Số lượng">
+                </div>
+
+                <%-- 5. Hạn sử dụng --%>
+                <div class="col-md-6 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
                     <input type="date" name="hanSuDung" class="form-control" required>
                 </div>
             </div>
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success py-2 fw-bold shadow-sm">LƯU VÀO KHO</button>
-                <a href="thuoc" class="btn btn-link text-secondary text-decoration-none">Hủy bỏ</a>
+            <div class="d-grid gap-2 mt-3">
+                <button type="submit" class="btn btn-success py-2 fw-bold shadow-sm">
+                    <i class="fas fa-save me-2"></i> LƯU VÀO KHO
+                </button>
+                <a href="thuoc" class="btn btn-outline-secondary py-2 text-decoration-none">
+                    <i class="fas fa-times me-2"></i> Hủy bỏ & Quay lại
+                </a>
             </div>
         </form>
     </div>
