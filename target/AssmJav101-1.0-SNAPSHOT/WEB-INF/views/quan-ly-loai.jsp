@@ -31,6 +31,22 @@
                                 <label class="form-label small fw-bold text-uppercase text-muted">Tên loại thuốc</label>
                                 <input type="text" name="tenLoai" class="form-control form-control-lg"
                                        placeholder="Ví dụ: Thuốc hạ sốt" required>
+                                <br>
+                                <label class="form-label small fw-bold text-uppercase text-muted">Trạng thái</label>
+                                <div class="d-flex gap-3 mt-1 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="trangThai" id="active" value="true" checked>
+                                        <label class="form-check-label" for="active">
+                                            Còn hoạt động
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="trangThai" id="inactive" value="false">
+                                        <label class="form-check-label" for="inactive">
+                                            Ngừng hoạt động
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm mt-2"
                                     style="background-color: #2c3e50; border: none;">
@@ -49,6 +65,7 @@
                             <tr>
                                 <th class="ps-4 py-3" style="width: 100px;">Mã ID</th>
                                 <th class="py-3">Tên Loại Thuốc</th>
+                                <th class="py-3">Trạng thái</th>
                                 <th class="py-3 text-center" style="width: 200px;">Thao tác</th>
                             </tr>
                             </thead>
@@ -57,10 +74,11 @@
                                 <tr>
                                     <td class="ps-4 text-muted fw-bold">#${item.id}</td>
                                     <td class="fw-bold text-dark category-name">${item.tenLoai}</td>
+                                    <td class="fw-bold text-dark category-name">${item.trangThai == true ? "Còn hoạt động" : "Ngừng hoạt động"}</td>
                                     <td class="text-center">
                                         <div class="btn-group shadow-sm" role="group">
                                             <button class="btn btn-white btn-sm text-warning border"
-                                                    onclick="openEditModal('${item.id}', '${item.tenLoai}')" title="Sửa">
+                                                    onclick="openEditModal('${item.id}', '${item.tenLoai}', '${item.trangThai}')" title="Sửa">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <a href="loai-thuoc?action=delete&id=${item.id}"
@@ -99,14 +117,37 @@
             <form action="loai-thuoc?action=update" method="post">
                 <div class="modal-body p-4">
                     <input type="hidden" name="id" id="editId">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Tên loại thuốc mới</label>
-                        <input type="text" name="tenLoai" id="editTen" class="form-control form-control-lg" required>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Tên loại thuốc mới</label>
+                        <input type="text" name="tenLoai" id="editTen" class="form-control form-control-lg border-2"
+                               placeholder="Nhập tên mới..." required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Trạng thái loại thuốc</label>
+                        <div class="d-flex gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trangThai" id="editTrangThaiTrue" value="true">
+                                <label class="form-check-label cursor-pointer" for="editTrangThaiTrue">
+                                    Còn hoạt động
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trangThai" id="editTrangThaiFalse" value="false">
+                                <label class="form-check-label cursor-pointer" for="editTrangThaiFalse">
+                                    Ngừng hoạt động
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary px-4" style="background-color: #2c3e50;">Cập nhật</button>
+
+                <div class="modal-footer border-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light px-4 fw-bold" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" style="background-color: #2c3e50; border: none;">
+                        <i class="fas fa-save me-2"></i>Cập nhật thay đổi
+                    </button>
                 </div>
             </form>
         </div>
@@ -127,9 +168,14 @@
         });
     });
 
-    function openEditModal(id, ten) {
+    function openEditModal(id, ten, trangthai) {
         document.getElementById('editId').value = id;
         document.getElementById('editTen').value = ten;
+        if(trangthai == true || trangthai == "true"){
+            document.getElementById('editTrangThaiTrue').checked = true;
+        }else{
+            document.getElementById('editTrangThaiFalse').checked = true;
+        }
         new bootstrap.Modal(document.getElementById('editModal')).show();
     }
 </script>

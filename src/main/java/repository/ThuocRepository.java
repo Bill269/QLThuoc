@@ -28,6 +28,7 @@ public class ThuocRepository {
                 "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
                 "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID " +
                 "WHERE t.TEN_THUOC LIKE ? AND t.SO_LUONG_TON > 0 " +
+                "AND l.TRANG_THAI = 1 " + // Thêm dòng này
                 "ORDER BY t.HAN_SU_DUNG ASC";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -45,7 +46,8 @@ public class ThuocRepository {
         String sql = "SELECT t.*, l.TEN_LOAI, d.TEN_DON_VI FROM THUOC t " +
                 "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
                 "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID " +
-                "WHERE t.TEN_THUOC LIKE ? ";
+                "WHERE t.TEN_THUOC LIKE ? AND l.TRANG_THAI = 1 "; // Thêm điều kiện trang_thai = 1
+
         if (idLoai != null && !idLoai.isEmpty()) sql += " AND t.ID_LOAI = ? ";
         sql += " ORDER BY t.ID DESC";
 
@@ -147,7 +149,8 @@ public class ThuocRepository {
     }
 
     public long getTotalStock() {
-        String sql = "SELECT SUM(SO_LUONG_TON) FROM THUOC";
+        String sql = "SELECT SUM(t.SO_LUONG_TON) FROM THUOC t " +
+                "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID WHERE l.TRANG_THAI = 1";
         try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             if (rs.next()) return rs.getLong(1);
         } catch (Exception e) { e.printStackTrace(); }
@@ -155,7 +158,10 @@ public class ThuocRepository {
     }
 
     public long countWarning() {
-        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG >= CAST(GETDATE() AS DATE) AND HAN_SU_DUNG <= DATEADD(day, 30, CAST(GETDATE() AS DATE))";
+        String sql = "SELECT COUNT(*) FROM THUOC t JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "WHERE t.HAN_SU_DUNG >= CAST(GETDATE() AS DATE) " +
+                "AND t.HAN_SU_DUNG <= DATEADD(day, 30, CAST(GETDATE() AS DATE)) " +
+                "AND l.TRANG_THAI = 1";
         try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             if (rs.next()) return rs.getLong(1);
         } catch (Exception e) { e.printStackTrace(); }
@@ -163,7 +169,8 @@ public class ThuocRepository {
     }
 
     public long countExpired() {
-        String sql = "SELECT COUNT(*) FROM THUOC WHERE HAN_SU_DUNG < CAST(GETDATE() AS DATE)";
+        String sql = "SELECT COUNT(*) FROM THUOC t JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "WHERE t.HAN_SU_DUNG < CAST(GETDATE() AS DATE) AND l.TRANG_THAI = 1";
         try (Connection con = DbConnector.getConnection(); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             if (rs.next()) return rs.getLong(1);
         } catch (Exception e) { e.printStackTrace(); }

@@ -59,15 +59,17 @@ public class LoaiThuocServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
         String tenLoai = req.getParameter("tenLoai");
+        Boolean trangThai = Boolean.parseBoolean(req.getParameter("trangThai"));
 
         try {
             if ("update".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-                LoaiThuoc lt = new LoaiThuoc(id, tenLoai);
+                LoaiThuoc lt = new LoaiThuoc(id, tenLoai, trangThai);
                 repo.update(lt);
             } else if ("insert".equals(action)) {
                 LoaiThuoc lt = new LoaiThuoc();
                 lt.setTenLoai(tenLoai);
+                lt.setTrangThai(trangThai);
                 repo.add(lt);
             }
             resp.sendRedirect("loai-thuoc");

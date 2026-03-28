@@ -74,7 +74,7 @@ public class ThuocServlet extends HttpServlet {
         List<Thuoc> list = repository.searchThuoc(txtSearch, selLoai);
 
         req.setAttribute("listThuoc", list);
-        req.setAttribute("listLoai", loaiRepo.getAll());
+        req.setAttribute("listLoai", loaiRepo.getAllLoai());
         req.setAttribute("totalAmount", repository.getTotalStock());
         req.setAttribute("warningCount", repository.countWarning());
         req.setAttribute("expiredCount", repository.countExpired());
@@ -83,7 +83,7 @@ public class ThuocServlet extends HttpServlet {
     }
 
     private void showAddForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("listLoai", loaiRepo.getAll());
+        req.setAttribute("listLoai", loaiRepo.getAllLoai());
         req.setAttribute("listDonVi", donViRepo.getAll()); // Thêm list Đơn vị
         req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
     }
@@ -93,7 +93,7 @@ public class ThuocServlet extends HttpServlet {
         Thuoc t = repository.getById(id);
         if (t != null) {
             req.setAttribute("thuocToEdit", t);
-            req.setAttribute("listLoai", loaiRepo.getAll());
+            req.setAttribute("listLoai", loaiRepo.getAllLoai());
             req.setAttribute("listDonVi", donViRepo.getAll()); // Thêm list Đơn vị
             req.getRequestDispatcher("/WEB-INF/views/sua-thuoc.jsp").forward(req, resp);
         } else {
