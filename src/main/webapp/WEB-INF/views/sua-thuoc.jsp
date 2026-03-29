@@ -53,6 +53,13 @@
                     <input type="number" name="soLuong" value="${thuocToEdit.soLuongTon}" class="form-control" required min="0">
                 </div>
 
+                <%--Bổ sung ngày nhập thuốc--%>
+                <div class="col-12 mb-4">
+                    <label class="form-label fw-bold text-secondary">Ngày nhập thuốc</label>
+                    <fmt:formatDate value="${thuocToEdit.ngayNhapThuoc}" pattern="yyyy-MM-dd" var="fmtD" />
+                    <input type="date" name="ngayNhap" value="${fmtD}" class="form-control" required>
+                </div>
+
                 <div class="col-12 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
                     <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="fmtD" />

@@ -15,6 +15,7 @@ public class ThuocRepository {
                 rs.getInt("ID_LOAI"),
                 rs.getString("TEN_LOAI"),
                 rs.getInt("SO_LUONG_TON"),
+                rs.getDate("NGAY_NHAP_THUOC"),
                 rs.getDate("HAN_SU_DUNG"),
                 rs.getFloat("GIA_BAN"),
                 rs.getInt("ID_DON_VI"),
@@ -76,28 +77,30 @@ public class ThuocRepository {
     }
 
     public void add(Thuoc t) {
-        String sql = "INSERT INTO THUOC (TEN_THUOC, ID_LOAI, SO_LUONG_TON, HAN_SU_DUNG, GIA_BAN, ID_DON_VI) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO THUOC (TEN_THUOC, ID_LOAI, SO_LUONG_TON, NGAY_NHAP_THUOC, HAN_SU_DUNG, GIA_BAN, ID_DON_VI) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection con = DbConnector.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
             ps.setInt(2, t.getIdLoai());
             ps.setInt(3, t.getSoLuongTon());
-            ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
-            ps.setFloat(5, t.getGiaBan());
-            ps.setInt(6, t.getIdDonVi()); // Thêm cột ID đơn vị
+            ps.setDate(4, new java.sql.Date(t.getNgayNhapThuoc().getTime()));
+            ps.setDate(5, new java.sql.Date(t.getHanSuDung().getTime()));
+            ps.setFloat(6, t.getGiaBan());
+            ps.setInt(7, t.getIdDonVi()); // Thêm cột ID đơn vị
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
 
     public void update(Thuoc t) {
-        String sql = "UPDATE THUOC SET TEN_THUOC=?, ID_LOAI=?, SO_LUONG_TON=?, HAN_SU_DUNG=?, GIA_BAN=?, ID_DON_VI=? WHERE ID=?";
+        String sql = "UPDATE THUOC SET TEN_THUOC=?, ID_LOAI=?, SO_LUONG_TON=?, NGAY_NHAP_THUOC = ?, HAN_SU_DUNG=?, GIA_BAN=?, ID_DON_VI=? WHERE ID=?";
         try (Connection con = DbConnector.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, t.getTenThuoc());
             ps.setInt(2, t.getIdLoai());
             ps.setInt(3, t.getSoLuongTon());
-            ps.setDate(4, new java.sql.Date(t.getHanSuDung().getTime()));
-            ps.setFloat(5, t.getGiaBan());
-            ps.setInt(6, t.getIdDonVi());
-            ps.setInt(7, t.getId());
+            ps.setDate(4, new java.sql.Date(t.getNgayNhapThuoc().getTime()));
+            ps.setDate(5, new java.sql.Date(t.getHanSuDung().getTime()));
+            ps.setFloat(6, t.getGiaBan());
+            ps.setInt(7, t.getIdDonVi());
+            ps.setInt(8, t.getId());
             ps.executeUpdate();
         } catch (Exception e) { e.printStackTrace(); }
     }
@@ -175,5 +178,27 @@ public class ThuocRepository {
             if (rs.next()) return rs.getLong(1);
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
+    }
+
+    public List<Thuoc> getAllNgayNhap() {
+        List<Thuoc> list = new ArrayList<>();
+
+        String sql = "SELECT t.*, l.TEN_LOAI, d.TEN_DON_VI FROM THUOC t " +
+                "JOIN LOAI_THUOC l ON t.ID_LOAI = l.ID " +
+                "JOIN DON_VI_TINH d ON t.ID_DON_VI = d.ID";
+
+        try (Connection connection = DbConnector.getConnection();
+             Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(mapResultSetToThuoc(rs));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

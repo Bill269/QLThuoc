@@ -73,6 +73,7 @@ public class ThuocServlet extends HttpServlet {
 
         List<Thuoc> list = repository.searchThuoc(txtSearch, selLoai);
 
+        setTrangThaiThuoc(list);
         req.setAttribute("listThuoc", list);
         req.setAttribute("listLoai", loaiRepo.getAllLoai());
         req.setAttribute("totalAmount", repository.getTotalStock());
@@ -103,8 +104,17 @@ public class ThuocServlet extends HttpServlet {
 
     private void showDetail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int id = Integer.parseInt(req.getParameter("id"));
-        req.setAttribute("thuoc", repository.getById(id));
-        req.getRequestDispatcher("/WEB-INF/views/chi-tiet-thuoc.jsp").forward(req, resp);
+        Thuoc thuoc = repository.getById(id);
+        if (thuoc != null) {
+            List<Thuoc> listTam = new java.util.ArrayList<>();
+            listTam.add(thuoc);
+
+            setTrangThaiThuoc(listTam);
+            req.setAttribute("thuoc", thuoc);
+            req.getRequestDispatcher("/WEB-INF/views/chi-tiet-thuoc.jsp").forward(req, resp);
+        } else {
+            resp.sendRedirect("thuoc?error=not_found");
+        }
     }
 
     private void deleteThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -118,9 +128,13 @@ public class ThuocServlet extends HttpServlet {
         int idDonVi = Integer.parseInt(req.getParameter("idDonVi"));
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
         float gia = Float.parseFloat(req.getParameter("giaBan"));
+        Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        repository.add(new Thuoc(ten, idLoai, "", soLuong, hanSD, gia, idDonVi, ""));
+        Thuoc thuoc = new Thuoc(ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, "");
+        setTrangThaiThuoc(java.util.Arrays.asList(thuoc)); // cập nhật trạng thái
+
+        repository.add(new Thuoc(ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, ""));
         resp.sendRedirect("thuoc?msg=inserted");
     }
 
@@ -131,9 +145,37 @@ public class ThuocServlet extends HttpServlet {
         int idDonVi = Integer.parseInt(req.getParameter("idDonVi"));
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
         float gia = Float.parseFloat(req.getParameter("giaBan"));
+        Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        repository.update(new Thuoc(id, ten, idLoai, "", soLuong, hanSD, gia, idDonVi, ""));
+        Thuoc thuoc = new Thuoc(id, ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, "");
+        setTrangThaiThuoc(java.util.Arrays.asList(thuoc)); // cập nhật trạng thái
+
+        repository.update(new Thuoc(id, ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, ""));
         resp.sendRedirect("thuoc?msg=updated");
+    }
+
+    private void setTrangThaiThuoc(List<Thuoc> list) {
+        Date now = new Date();
+        for (Thuoc t : list) {
+            Date ngayNhap = t.getNgayNhapThuoc();
+            if (ngayNhap == null) {
+                t.setTrangThaiThuoc("Không xác định");
+                continue;
+            }
+
+            long diffMillis = now.getTime() - ngayNhap.getTime();
+            long diffDays = diffMillis / (1000 * 60 * 60 * 24);
+
+            if (diffDays < 0) {
+                t.setTrangThaiThuoc("Chưa nhập"); // ngày nhập nằm ở tương lai
+            } else if (diffDays <= 7) {
+                t.setTrangThaiThuoc("Lô mới");
+            } else if (diffDays <= 90) {
+                t.setTrangThaiThuoc("Lô cũ");
+            } else {
+                t.setTrangThaiThuoc("Hàng tồn kho");
+            }
+        }
     }
 }

@@ -62,6 +62,17 @@
                             </c:otherwise>
                         </c:choose>
                     </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Tình trạng thuốc</label>
+
+                        <span class="badge
+                            ${thuoc.trangThaiThuoc == 'Lô mới' ? 'badge-green' :
+                              thuoc.trangThaiThuoc == 'Lô cũ' ? 'badge-yellow' :
+                              thuoc.trangThaiThuoc == 'Hàng tồn kho' ? 'badge-orange' : 'badge-red'}">
+                            ${thuoc.trangThaiThuoc}
+                        </span>
+                    </div>
                 </div>
 
                 <%-- Cột bên phải --%>
@@ -84,6 +95,14 @@
                             <fmt:formatDate value="${thuoc.hanSuDung}" pattern="dd/MM/yyyy" />
                         </span>
                     </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 0.8em; color: #999; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Ngày nhập thuốc</label>
+                        <span style="font-size: 1.1em; color: #333; font-weight: 600;">
+                            <i class="far fa-calendar-alt" style="color: #e67e22; margin-right: 8px;"></i>
+                            <fmt:formatDate value="${thuoc.ngayNhapThuoc}" pattern="dd/MM/yyyy" />
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -104,5 +123,35 @@
         </div>
     </div>
 </div>
+
+<style>
+    .badge {
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        border: 2px solid;
+    }
+
+    .badge-green {
+        color: #28a745;
+        border-color: #28a745;
+        background-color: transparent;
+    }
+
+    .badge-yellow {
+        color: #ffc107;
+        border-color: #ffc107;
+        background-color: transparent;
+    }
+
+    .badge-red {
+        color: #dc3545;
+        border-color: #dc3545;
+        background-color: transparent;
+    }
+</style>
 
 <%@ include file="fragment/footer.jsp" %>

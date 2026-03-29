@@ -60,6 +60,34 @@
         text-align: center;
         min-width: 110px;
     }
+
+    .badge {
+        display: inline-block;
+        min-width: 100px;
+        text-align: center;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        border: 2px solid;
+    }
+
+    .badge-green {
+        color: #28a745;
+        border-color: #28a745;
+        background-color: transparent;
+    }
+
+    .badge-yellow {
+        color: #ffc107;
+        border-color: #ffc107;
+        background-color: transparent;
+    }
+
+    .badge-red {
+        color: #dc3545;
+        border-color: #dc3545;
+        background-color: transparent;
+    }
 </style>
 
 <div class="main-container">
@@ -123,6 +151,7 @@
                 <th>Số Lượng</th>
                 <th>Đơn Vị Tính</th>
                 <th>Trạng Thái</th>
+                <th>Tình trạng</th>
                 <th>Thao Tác</th>
             </tr>
             </thead>
@@ -163,6 +192,16 @@
                                 <span class="badge-status" style="background: #2ecc71;">CÒN HẠN</span>
                             </c:otherwise>
                         </c:choose>
+                    </td>
+
+                    <td>
+                        <span class="
+                            badge
+                            ${thuoc.trangThaiThuoc == 'Lô mới' ? 'badge-green' :
+                              thuoc.trangThaiThuoc == 'Lô cũ' ? 'badge-yellow' :
+                              'badge-red'}">
+                                ${thuoc.trangThaiThuoc}
+                        </span>
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">

@@ -50,6 +50,12 @@
                     </select>
                 </div>
 
+                <%--Bổ sung ngày nhập thuốc--%>
+                    <div class="col-12 mb-4">
+                        <label class="form-label fw-bold text-secondary">Ngày nhập thuốc</label>
+                        <input type="date" name="ngayNhap" class="form-control" required>
+                    </div>
+
                 <%-- 6. Hạn sử dụng --%>
                 <div class="col-12 mb-4">
                     <label class="form-label fw-bold text-secondary">Hạn sử dụng</label>
