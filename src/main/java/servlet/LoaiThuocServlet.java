@@ -31,8 +31,14 @@ public class LoaiThuocServlet extends HttpServlet {
 
             if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
+
+                if (repo.isLoaiThuocDaDung(id)) {
+                    resp.sendRedirect("loai-thuoc?error=has_products");
+                    return;
+                }
+
                 repo.delete(id);
-                resp.sendRedirect("loai-thuoc");
+                resp.sendRedirect("loai-thuoc?msg=deleted");
                 return;
             }
 

@@ -141,6 +141,20 @@
 
     <%-- Bảng hiển thị --%>
     <div class="table-container">
+        <%-- Kiểm tra param error từ Servlet gửi về --%>
+        <c:if test="${param.error == 'has_invoice'}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Không thể xóa!</strong> Thuốc này đã có trong lịch sử hóa đơn bán hàng.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
+        <c:if test="${param.msg == 'deleted'}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                Xóa thuốc thành công!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
         <table class="medicine-table">
             <thead>
             <tr>

@@ -201,4 +201,19 @@ public class ThuocRepository {
 
         return list;
     }
+
+    public boolean isThuocDaBan(int idThuoc) {
+        String sql = "SELECT COUNT(*) FROM CHI_TIET_HOA_DON WHERE ID_THUOC = ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idThuoc);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Trả về true nếu số lượng > 0
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

@@ -118,6 +118,13 @@ public class ThuocServlet extends HttpServlet {
     }
 
     private void deleteThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        int id = Integer.parseInt(req.getParameter("id"));
+
+        if (repository.isThuocDaBan(id)) {
+            resp.sendRedirect("thuoc?error=has_invoice");
+            return;
+        }
+
         repository.delete(Integer.parseInt(req.getParameter("id")));
         resp.sendRedirect("thuoc?msg=deleted");
     }

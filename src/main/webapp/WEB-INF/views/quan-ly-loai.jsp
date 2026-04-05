@@ -58,6 +58,20 @@
             </div>
 
             <div class="col-lg-8">
+
+                <c:if test="${param.error == 'has_products'}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Thao tác bị từ chối!</strong> Vẫn còn thuốc thuộc danh mục loại này. Vui lòng xóa/đổi loại của các thuốc đó trước.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
+
+                <c:if test="${param.msg == 'deleted'}">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Xóa loại thuốc thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
                 <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle m-0" id="categoryTable">

@@ -83,4 +83,19 @@ public class LoaiThuocRepository {
         }
         return list;
     }
+
+    public boolean isLoaiThuocDaDung(int idLoai) {
+        String sql = "SELECT COUNT(*) FROM THUOC WHERE ID_LOAI = ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idLoai);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
