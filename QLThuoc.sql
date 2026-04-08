@@ -4,144 +4,132 @@ GO
 USE QUANLYTHUOC;
 GO
 
--- 2. Tạo bảng NGUOIDUNG (Có ID tự tăng để sau này sửa được Username)
+-- Bảng Người dùng
 CREATE TABLE NGUOIDUNG (
-    ID INT IDENTITY(1,1) PRIMARY KEY,        -- ID tự động tăng (1, 2, 3...)
-    TEN_DANG_NHAP VARCHAR(50) NOT NULL UNIQUE, -- Unique để không bị trùng tên
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    TEN_DANG_NHAP VARCHAR(50) NOT NULL UNIQUE,
     MAT_KHAU VARCHAR(100) NOT NULL,
     NHOM_QUYEN VARCHAR(20) NOT NULL
 );
 
--- 3. Tạo bảng THUOC (Dùng ID tự tăng làm khóa chính)
-CREATE TABLE THUOC (
-    ID INT IDENTITY(1,1) PRIMARY KEY,        -- ID tự động tăng
-    TEN_THUOC NVARCHAR(255) NOT NULL,
-    LOAI_THUOC NVARCHAR(50) NULL,
-    SO_LUONG_TON INT NOT NULL DEFAULT 0,
-	NGAY_NHAP_THUOC DATE NOT NULL,
-    HAN_SU_DUNG DATE NOT NULL
+-- Bảng Loại Thuốc (Kháng sinh, Giảm đau, Vitamin...)
+CREATE TABLE LOAI_THUOC (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    TEN_LOAI NVARCHAR(100) NOT NULL,
+    TRANG_THAI BIT NOT NULL DEFAULT 1
 );
 
--- 1. Tạo bảng Hóa Đơn (Lưu thông tin tổng quát)
+-- Bảng Đơn Vị Tính (Viên, Vỉ, Hộp, Chai...)
+CREATE TABLE DON_VI_TINH (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    TEN_DON_VI NVARCHAR(50) NOT NULL 
+);
+
+-- Bảng THUOC_CHA (Danh mục tên thuốc gốc)
+CREATE TABLE THUOC_CHA (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    TEN_THUOC_CHA NVARCHAR(255) NOT NULL,
+    TINH_TRANG BIT DEFAULT 1 -- 1: Đang kinh doanh, 0: Ngừng bán
+);
+
+-- =============================================
+-- 2. BẢNG THUOC (QUẢN LÝ LÔ HÀNG VÀ KHO)
+-- =============================================
+CREATE TABLE THUOC (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    ID_TEN_THUOC INT NOT NULL,           -- Khóa ngoại tới THUOC_CHA
+    ID_LOAI INT NOT NULL,                -- Khóa ngoại tới LOAI_THUOC
+    ID_DON_VI INT NOT NULL,              -- Khóa ngoại tới DON_VI_TINH
+    GIA_BAN DECIMAL(18, 2) NOT NULL DEFAULT 0,
+    SO_LUONG_TON INT NOT NULL DEFAULT 0,
+    NGAY_NHAP_THUOC DATE NOT NULL DEFAULT GETDATE(),
+    HAN_SU_DUNG DATE NOT NULL,
+    
+    -- Thiết lập các mối quan hệ
+    CONSTRAINT FK_Thuoc_DanhMuc_Cha FOREIGN KEY (ID_TEN_THUOC) REFERENCES THUOC_CHA(ID),
+    CONSTRAINT FK_Thuoc_LoaiThuoc FOREIGN KEY (ID_LOAI) REFERENCES LOAI_THUOC(ID),
+    CONSTRAINT FK_Thuoc_DonViTinh FOREIGN KEY (ID_DON_VI) REFERENCES DON_VI_TINH(ID)
+);
+
+-- =============================================
+-- 3. QUẢN LÝ BÁN HÀNG
+-- =============================================
 CREATE TABLE HOA_DON (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     NGAY_LAP DATETIME DEFAULT GETDATE(),
     ID_USER INT FOREIGN KEY REFERENCES NGUOIDUNG(ID)
 );
 
--- 2. Tạo bảng Chi Tiết Hóa Đơn (Lưu thông tin thuốc đã bán)
 CREATE TABLE CHI_TIET_HOA_DON (
-    ID_HOA_DON INT FOREIGN KEY REFERENCES HOA_DON(ID),
-    ID_THUOC INT FOREIGN KEY REFERENCES THUOC(ID),
+    ID_HOA_DON INT NOT NULL,
+    ID_THUOC INT NOT NULL,               -- Bán theo từng lô thuốc cụ thể
     SO_LUONG INT DEFAULT 1,
-    PRIMARY KEY (ID_HOA_DON, ID_THUOC)
+    GIA_LUC_BAN DECIMAL(18, 2) NOT NULL, -- Lưu giá tại thời điểm bán
+    PRIMARY KEY (ID_HOA_DON, ID_THUOC),
+    CONSTRAINT FK_CTHD_HoaDon FOREIGN KEY (ID_HOA_DON) REFERENCES HOA_DON(ID),
+    CONSTRAINT FK_CTHD_Thuoc FOREIGN KEY (ID_THUOC) REFERENCES THUOC(ID)
 );
 
--- 4. Chèn dữ liệu mẫu cho NGUOIDUNG
--- Lưu ý: KHÔNG chèn cột ID vì máy tự sinh
-INSERT INTO NGUOIDUNG (TEN_DANG_NHAP, MAT_KHAU, NHOM_QUYEN) 
-VALUES 
-('admin', '123', 'ADMIN'), -- Sẽ có ID = 1
-('user', '123', 'USER');   -- Sẽ có ID = 2
+-- 1. DỮ LIỆU BẢNG LOẠI THUỐC (10 mẫu)
+INSERT INTO LOAI_THUOC (TEN_LOAI, TRANG_THAI) VALUES 
+(N'Kháng sinh', 1),
+(N'Giảm đau', 1),
+(N'Vitamin & Khoáng chất', 1),
+(N'Thực phẩm chức năng', 1),
+(N'Thuốc ho & Cảm cúm', 1),
+(N'Thuốc tiêu hóa', 1),
+(N'Thuốc ngoài da', 1),
+(N'Thuốc dị ứng', 1),
+(N'Thuốc nhỏ mắt', 1),
+(N'Thảo dược', 1);
 
--- 5. Chèn dữ liệu mẫu cho THUOC
--- Lưu ý: KHÔNG chèn cột ID
-INSERT INTO THUOC (TEN_THUOC, LOAI_THUOC, SO_LUONG_TON, NGAY_NHAP_THUOC, HAN_SU_DUNG) 
-VALUES 
-(N'Paracetamol', N'Giảm đau', 100, '2026-03-29', '2026-12-25'),
-(N'Amoxicillin', N'Kháng sinh', 50, '2026-03-29','2028-01-01'),
-(N'Vitamin C', N'Vitamin', 200, '2026-03-29','2027-06-15'),
-(N'Panadol Extra', N'Giảm đau', 150, '2026-03-29','2025-05-20');
+-- 2. DỮ LIỆU BẢNG ĐƠN VỊ TÍNH (10 mẫu)
+INSERT INTO DON_VI_TINH (TEN_DON_VI) VALUES 
+(N'Viên'), (N'Vỉ'), (N'Hộp'), (N'Chai'), (N'Gói'), 
+(N'Tuýp'), (N'Ống'), (N'Lọ'), (N'Viên sủi'), (N'Túi');
 
--- 1. Tạo bảng Loại Thuốc
-CREATE TABLE LOAI_THUOC (
-    ID INT PRIMARY KEY IDENTITY(1,1),
-    TEN_LOAI NVARCHAR(100) NOT NULL,
-	TRANG_THAI BIT NOT NULL
-);
+-- 3. DỮ LIỆU BẢNG THUOC_CHA (Danh mục - 10 mẫu)
+INSERT INTO THUOC_CHA (TEN_THUOC_CHA, TINH_TRANG) VALUES 
+(N'Paracetamol 500mg', 1),
+(N'Amoxicillin 500mg', 1),
+(N'Hapacol 150', 1),
+(N'Panadol Extra', 1),
+(N'Decolgen Forte', 1),
+(N'Enervon', 1),
+(N'Smecta', 1),
+(N'Berberin', 1),
+(N'Salonpas Gel', 1),
+(N'Eugica', 1);
 
--- 2. Thêm cột ID_LOAI vào bảng THUOC và tạo khóa ngoại
-ALTER TABLE THUOC ADD ID_LOAI INT;
-ALTER TABLE THUOC ADD CONSTRAINT FK_Thuoc_Loai FOREIGN KEY (ID_LOAI) REFERENCES LOAI_THUOC(ID);
+-- 4. DỮ LIỆU BẢNG THUOC (10 lô hàng mẫu)
+-- Lưu ý: Một số thuốc có 2 lô hàng khác nhau để test logic của bạn
+INSERT INTO THUOC (ID_TEN_THUOC, ID_LOAI, ID_DON_VI, GIA_BAN, SO_LUONG_TON, NGAY_NHAP_THUOC, HAN_SU_DUNG) VALUES 
+(1, 2, 2, 5000, 100, '2026-01-10', '2027-12-31'), -- Paracetamol Lô A
+(1, 2, 2, 5500, 50, '2026-03-01', '2028-06-15'),  -- Paracetamol Lô B
+(2, 1, 3, 120000, 20, '2026-02-15', '2027-05-20'), -- Amoxicillin
+(3, 2, 5, 3000, 200, '2026-03-10', '2026-11-11'), -- Hapacol
+(4, 2, 2, 8000, 150, '2026-01-20', '2027-01-01'), -- Panadol
+(5, 5, 2, 12000, 80, '2026-03-25', '2027-08-15'), -- Decolgen
+(6, 3, 3, 45000, 40, '2026-02-01', '2028-02-01'), -- Enervon
+(7, 6, 5, 5000, 300, '2026-03-15', '2026-12-20'), -- Smecta
+(8, 6, 8, 25000, 60, '2026-01-05', '2027-03-10'), -- Berberin
+(10, 5, 3, 65000, 25, '2026-03-20', '2028-10-25'); -- Eugica
 
--- 3. Chèn dữ liệu mẫu cho Loại Thuốc
-INSERT INTO LOAI_THUOC (TEN_LOAI, TRANG_THAI) VALUES (N'Kháng sinh', 1), (N'Giảm đau', 1), (N'Vitamin', 1), (N'Thực phẩm chức năng', 1);
--- 6. Kiểm tra lại dữ liệu
-SELECT * FROM NGUOIDUNG;
-SELECT * FROM THUOC;
+-- 5. DỮ LIỆU BẢNG HOA_DON (10 mẫu)
+-- Giả sử ID_USER 1 và 2 đã tạo ở lượt trước
+INSERT INTO HOA_DON (NGAY_LAP, ID_USER) VALUES 
+(GETDATE(), 1), (GETDATE(), 1), (GETDATE(), 2), (GETDATE(), 2), (GETDATE(), 1),
+(GETDATE(), 2), (GETDATE(), 1), (GETDATE(), 2), (GETDATE(), 1), (GETDATE(), 2);
 
--- 1. Bổ sung cột GIA_BAN vào bảng THUOC
-ALTER TABLE THUOC ADD GIA_BAN DECIMAL(18, 2) NOT NULL DEFAULT 0;
-
--- 2. Cập nhật giá và ID_LOAI cho dữ liệu mẫu hiện có
--- Giả sử: 1: Kháng sinh, 2: Giảm đau, 3: Vitamin
-UPDATE THUOC SET GIA_BAN = 5000,  ID_LOAI = 2 WHERE TEN_THUOC = N'Paracetamol';
-UPDATE THUOC SET GIA_BAN = 15000, ID_LOAI = 1 WHERE TEN_THUOC = N'Amoxicillin';
-UPDATE THUOC SET GIA_BAN = 2000,  ID_LOAI = 3 WHERE TEN_THUOC = N'Vitamin C';
-UPDATE THUOC SET GIA_BAN = 8000,  ID_LOAI = 2 WHERE TEN_THUOC = N'Panadol Extra';
-
--- 3. Cập nhật bảng CHI_TIET_HOA_DON để lưu giá lúc bán
-ALTER TABLE CHI_TIET_HOA_DON ADD GIA_LUC_BAN DECIMAL(18, 2);
-
--- 4. Chèn thêm thuốc mới có đầy đủ giá
-INSERT INTO THUOC (TEN_THUOC, ID_LOAI, SO_LUONG_TON, NGAY_NHAP_THUOC, HAN_SU_DUNG, GIA_BAN)
-VALUES (N'Decolgen', 2, 80, '2026-03-29', '2026-10-10', 12000);
-
--- 5. Truy vấn kiểm tra tổng hợp (JOIN các bảng)
-SELECT 
-    T.ID, 
-    T.TEN_THUOC, 
-    L.TEN_LOAI, 
-    T.GIA_BAN, 
-    T.SO_LUONG_TON, 
-	T. NGAY_NHAP_THUOC,
-    T.HAN_SU_DUNG
-FROM THUOC T
-LEFT JOIN LOAI_THUOC L ON T.ID_LOAI = L.ID;
-
--- Tạo bảng Loại Số Lượng (Đơn vị tính)
--- 1. Tạo bảng đơn vị tính (Đồng nhất tên cột là TEN_DON_VI)
-CREATE TABLE DON_VI_TINH (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
-    TEN_DON_VI NVARCHAR(50) NOT NULL 
-);
-
--- 2. Thêm cột khóa ngoại vào bảng THUOC
-ALTER TABLE THUOC ADD ID_DON_VI INT;
-
--- 3. Thiết lập liên kết khóa ngoại
-ALTER TABLE THUOC 
-ADD CONSTRAINT FK_Thuoc_DonVi 
-FOREIGN KEY (ID_DON_VI) REFERENCES DON_VI_TINH(ID);
-
--- 4. Chèn dữ liệu mẫu vào bảng DON_VI_TINH
--- Sau khi chạy lệnh này: Viên(1), Vỉ(2), Hộp(3), Gói(4), Chai(5)
-INSERT INTO DON_VI_TINH(TEN_DON_VI) 
-VALUES (N'Viên'), (N'Vỉ'), (N'Hộp'), (N'Gói'), (N'Chai');
-
--- 5. Cập nhật dữ liệu cho bảng THUOC
--- Paracetamol thường tính theo Vỉ (ID = 2)
-UPDATE THUOC 
-SET ID_DON_VI = 2 
-WHERE TEN_THUOC = N'Paracetamol';
-
--- Vitamin C cập nhật theo Hộp (ID = 3) như chú thích của bạn
-UPDATE THUOC 
-SET ID_DON_VI = 3 
-WHERE TEN_THUOC = N'Vitamin C';
-UPDATE THUOC 
-SET ID_DON_VI = 1 
-WHERE TEN_THUOC = N'Decolgen';
-
--- Vitamin C cập nhật theo Hộp (ID = 3) như chú thích của bạn
-UPDATE THUOC 
-SET ID_DON_VI = 5 
-WHERE TEN_THUOC = N'Panadol Extra';
-
-UPDATE THUOC 
-SET ID_DON_VI = 1 
-WHERE TEN_THUOC = N'Amoxicillin';
-select * from  thuoc 
-select * from DON_VI_TINH
-
-select * from NGUOIDUNG
+-- 6. DỮ LIỆU BẢNG CHI_TIET_HOA_DON (10 mẫu)
+INSERT INTO CHI_TIET_HOA_DON (ID_HOA_DON, ID_THUOC, SO_LUONG, GIA_LUC_BAN) VALUES 
+(1, 1, 2, 5000),  -- Hóa đơn 1 mua 2 vỉ Paracetamol lô 1
+(1, 3, 1, 120000),-- Hóa đơn 1 mua thêm Amoxicillin
+(2, 4, 5, 3000),
+(3, 5, 2, 8000),
+(4, 2, 1, 5500),  -- Mua Paracetamol nhưng ở lô 2
+(5, 6, 3, 12000),
+(6, 7, 10, 45000),
+(7, 8, 2, 5000),
+(8, 9, 1, 25000),
+(9, 10, 2, 65000);

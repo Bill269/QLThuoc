@@ -3,20 +3,24 @@ package servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import model.LoaiThuoc;
 import model.Thuoc;
+import model.ThuocCha;
 import repository.DonViRepository;
 import repository.LoaiThuocRepository;
 import repository.ThuocRepository;
+import repository.ThuocChaRepository;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
-@WebServlet("/thuoc")
+@WebServlet("/kho")
 public class ThuocServlet extends HttpServlet {
     private final ThuocRepository repository = new ThuocRepository();
+    private final ThuocChaRepository thuocChaRepo = new ThuocChaRepository(); // Thêm để lấy list thuốc cha cho form
     private final LoaiThuocRepository loaiRepo = new LoaiThuocRepository();
     private final DonViRepository donViRepo = new DonViRepository();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -46,7 +50,7 @@ public class ThuocServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect("thuoc?error=system_error");
+            resp.sendRedirect("kho?error=system_error");
         }
     }
 
@@ -63,7 +67,7 @@ public class ThuocServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect("thuoc?error=action_failed");
+            resp.sendRedirect("kho?error=action_failed");
         }
     }
 
@@ -72,6 +76,8 @@ public class ThuocServlet extends HttpServlet {
         String selLoai = req.getParameter("selLoai");
 
         List<Thuoc> list = repository.searchThuoc(txtSearch, selLoai);
+
+        req.setAttribute("totalTypes", thuocChaRepo.getAll().size());
 
         setTrangThaiThuoc(list);
         req.setAttribute("listThuoc", list);
@@ -84,8 +90,9 @@ public class ThuocServlet extends HttpServlet {
     }
 
     private void showAddForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Sửa lỗi: Nạp listThuocCha để hiển thị tên thuốc trong dropdown thêm mới
+        req.setAttribute("listThuocCha", thuocChaRepo.getThuocChaDangBan());
         req.setAttribute("listLoai", loaiRepo.getAllLoai());
-        req.setAttribute("listDonVi", donViRepo.getAll()); // Thêm list Đơn vị
         req.getRequestDispatcher("/WEB-INF/views/them-thuoc.jsp").forward(req, resp);
     }
 
@@ -95,10 +102,11 @@ public class ThuocServlet extends HttpServlet {
         if (t != null) {
             req.setAttribute("thuocToEdit", t);
             req.setAttribute("listLoai", loaiRepo.getAllLoai());
-            req.setAttribute("listDonVi", donViRepo.getAll()); // Thêm list Đơn vị
+            // Cần listThuocCha nếu bạn cho phép đổi tên thuốc khi sửa lô
+            req.setAttribute("listThuocCha", thuocChaRepo.getAll());
             req.getRequestDispatcher("/WEB-INF/views/sua-thuoc.jsp").forward(req, resp);
         } else {
-            resp.sendRedirect("thuoc");
+            resp.sendRedirect("kho");
         }
     }
 
@@ -106,14 +114,11 @@ public class ThuocServlet extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
         Thuoc thuoc = repository.getById(id);
         if (thuoc != null) {
-            List<Thuoc> listTam = new java.util.ArrayList<>();
-            listTam.add(thuoc);
-
-            setTrangThaiThuoc(listTam);
+            setTrangThaiThuoc(Arrays.asList(thuoc));
             req.setAttribute("thuoc", thuoc);
             req.getRequestDispatcher("/WEB-INF/views/chi-tiet-thuoc.jsp").forward(req, resp);
         } else {
-            resp.sendRedirect("thuoc?error=not_found");
+            resp.sendRedirect("kho?error=not_found");
         }
     }
 
@@ -121,45 +126,56 @@ public class ThuocServlet extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
 
         if (repository.isThuocDaBan(id)) {
-            resp.sendRedirect("thuoc?error=has_invoice");
+            resp.sendRedirect("kho?error=has_invoice");
             return;
         }
 
-        repository.delete(Integer.parseInt(req.getParameter("id")));
-        resp.sendRedirect("thuoc?msg=deleted");
+        repository.delete(id);
+        resp.sendRedirect("kho?msg=deleted");
     }
 
     private void insertThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        String ten = req.getParameter("ten");
-        int idLoai = Integer.parseInt(req.getParameter("idLoai"));
-        int idDonVi = Integer.parseInt(req.getParameter("idDonVi"));
+        int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
-        float gia = Float.parseFloat(req.getParameter("giaBan"));
-        Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        Thuoc thuoc = new Thuoc(ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, "");
-        setTrangThaiThuoc(java.util.Arrays.asList(thuoc)); // cập nhật trạng thái
+        ThuocCha tc = new ThuocCha();
+        tc.setId(idTenThuoc);
 
-        repository.add(new Thuoc(ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, ""));
-        resp.sendRedirect("thuoc?msg=inserted");
+        // Tạo đối tượng Thuoc
+        Thuoc thuoc = new Thuoc();
+        thuoc.setThuocCha(tc);
+        thuoc.setSoLuongTon(soLuong);
+        thuoc.setHanSuDung(hanSD);
+
+        // TỰ ĐỘNG GÁN NGÀY HÔM NAY
+        thuoc.setNgayNhapThuoc(new Date());
+
+        repository.add(thuoc);
+        resp.sendRedirect("kho?msg=inserted");
     }
 
     private void updateThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         int id = Integer.parseInt(req.getParameter("id"));
-        String ten = req.getParameter("ten");
-        int idLoai = Integer.parseInt(req.getParameter("idLoai"));
-        int idDonVi = Integer.parseInt(req.getParameter("idDonVi"));
+        int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
         int soLuong = Integer.parseInt(req.getParameter("soLuong"));
-        float gia = Float.parseFloat(req.getParameter("giaBan"));
+
+        // LẤY NGÀY NHẬP TỪ FORM (Ô input name="ngayNhap" bạn vừa thêm ở JSP)
         Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
-        Thuoc thuoc = new Thuoc(id, ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, "");
-        setTrangThaiThuoc(java.util.Arrays.asList(thuoc)); // cập nhật trạng thái
+        ThuocCha tc = new ThuocCha();
+        tc.setId(idTenThuoc);
 
-        repository.update(new Thuoc(id, ten, idLoai, "", soLuong, ngayNhap, hanSD, gia, idDonVi, ""));
-        resp.sendRedirect("thuoc?msg=updated");
+        Thuoc thuoc = new Thuoc();
+        thuoc.setId(id);
+        thuoc.setThuocCha(tc);
+        thuoc.setSoLuongTon(soLuong);
+        thuoc.setNgayNhapThuoc(ngayNhap); // Đưa ngày nhập vào đối tượng để update
+        thuoc.setHanSuDung(hanSD);
+
+        repository.update(thuoc); // Đảm bảo hàm update trong Repo của bạn có câu lệnh SQL cập nhật NGAY_NHAP_THUOC
+        resp.sendRedirect("kho?msg=updated");
     }
 
     private void setTrangThaiThuoc(List<Thuoc> list) {
@@ -167,7 +183,7 @@ public class ThuocServlet extends HttpServlet {
         for (Thuoc t : list) {
             Date ngayNhap = t.getNgayNhapThuoc();
             if (ngayNhap == null) {
-                t.setTrangThaiThuoc("Không xác định");
+                t.setTrangThaiThuoc("Đang cập nhật");
                 continue;
             }
 
@@ -175,13 +191,13 @@ public class ThuocServlet extends HttpServlet {
             long diffDays = diffMillis / (1000 * 60 * 60 * 24);
 
             if (diffDays < 0) {
-                t.setTrangThaiThuoc("Chưa nhập"); // ngày nhập nằm ở tương lai
+                t.setTrangThaiThuoc("Hàng chờ nhập"); // Ngày nhập ở tương lai
             } else if (diffDays <= 7) {
-                t.setTrangThaiThuoc("Lô mới");
-            } else if (diffDays <= 90) {
-                t.setTrangThaiThuoc("Lô cũ");
+                t.setTrangThaiThuoc("Lô mới");        // Từ 0 đến 7 ngày
+            } else if (diffDays > 7 && diffDays <= 90) {
+                t.setTrangThaiThuoc("Lô cũ");         // Từ ngày thứ 8 đến ngày 90 -> Sẽ vào đây!
             } else {
-                t.setTrangThaiThuoc("Hàng tồn kho");
+                t.setTrangThaiThuoc("Hàng tồn kho");  // Trên 90 ngày
             }
         }
     }

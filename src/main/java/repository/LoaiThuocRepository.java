@@ -85,7 +85,7 @@ public class LoaiThuocRepository {
     }
 
     public boolean isLoaiThuocDaDung(int idLoai) {
-        String sql = "SELECT COUNT(*) FROM THUOC WHERE ID_LOAI = ?";
+        String sql = "SELECT COUNT(*) FROM THUOC_CHA WHERE ID_LOAI = ?";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idLoai);

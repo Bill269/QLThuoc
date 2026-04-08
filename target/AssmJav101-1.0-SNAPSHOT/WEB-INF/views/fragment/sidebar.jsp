@@ -92,18 +92,18 @@
            class="sidebar-link ${param.action eq 'history' ? 'active' : ''}">
             <i class="fas fa-file-invoice-dollar"></i> <span>Hóa Đơn</span>
         </a>
-        <a href="${pageContext.request.contextPath}/thuoc"
-           class="sidebar-link ${fn:contains(request.getRequestURI(), '/thuoc') && !fn:contains(request.getRequestURI(), 'action=add') ? 'active' : ''}">
-            <i class="fas fa-list"></i> <span>Danh Sách Thuốc</span>
+        <a href="${pageContext.request.contextPath}/kho"
+           class="sidebar-link ${fn:contains(request.getRequestURI(), '/kho') && !fn:contains(request.getRequestURI(), 'action=add') ? 'active' : ''}">
+            <i class="fas fa-list"></i> <span>Kho thuốc</span>
         </a>
 
         <c:if test="${currentUser.nhomQuyen eq 'ADMIN'}">
-            <a href="<%= request.getContextPath() %>/thuoc?action=add"
+            <a href="<%= request.getContextPath() %>/kho?action=add"
                class="sidebar-link ${fn:contains(request.getQueryString(), 'action=add') ? 'active' : ''}">
-                <i class="fas fa-plus"></i> <span>Thêm Thuốc</span>
+                <i class="fas fa-plus"></i> <span>Thêm lô</span>
             </a>
             <a href="${pageContext.request.contextPath}/loai-thuoc"
-               class="sidebar-link ${fn:contains(request.getRequestURI(), '/loai-thuoc') ? 'active' : ''}">
+               class="sidebar-link ${fn:contains(request.getRequestURI(), '/loai-thuoc') ? 'active' : ''}"  >
                 <i class="fas fa-tags"></i> <span>Loại Thuốc</span>
             </a>
             <a href="${pageContext.request.contextPath}/users"
@@ -113,6 +113,10 @@
             <a href="${pageContext.request.contextPath}/send-email"
                class="sidebar-link ${fn:contains(request.getRequestURI(), '/send-email') ? 'active' : ''}">
                 <i class="fas fa-envelope"></i> <span>Gửi Email</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/thuoc"
+               class="sidebar-link ${fn:contains(request.getRequestURI(), '/thuoc') ? 'active' : ''}">
+                <i class="fas fa-envelope"></i> <span>Thuốc</span>
             </a>
         </c:if>
     </div>
