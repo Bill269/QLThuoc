@@ -12,10 +12,8 @@ public class HoaDonServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Lấy dữ liệu từ repository
-        req.setAttribute("listHD", hdRepo.getLichSuBanHang());
-
-        // Forward sang trang JSP lịch sử
+        // Thay đổi hàm gọi từ getLichSuBanHang() sang getLichSuBanHangGop()
+        req.setAttribute("listHD", hdRepo.getLichSuBanHangGop());
         req.getRequestDispatcher("/WEB-INF/views/lich-su-ban-hang.jsp").forward(req, resp);
     }
 }

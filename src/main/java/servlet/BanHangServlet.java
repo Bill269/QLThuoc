@@ -3,55 +3,96 @@ package servlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import model.GioHangItem;
+import model.Thuoc;
 import model.User;
 import repository.ThuocRepository;
-import repository.HoaDonRepository; // Đảm bảo đã import HoaDonRepository
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @WebServlet("/ban-hang")
 public class BanHangServlet extends HttpServlet {
     private final ThuocRepository repo = new ThuocRepository();
-    private final HoaDonRepository hdRepo = new HoaDonRepository();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        String search = req.getParameter("txtSearch");
-        if (search == null) search = "";
+        HttpSession session = req.getSession();
 
-        if ("sell".equals(action)) {
+        // 1. Khởi tạo giỏ hàng
+        Map<Integer, GioHangItem> cart = (Map<Integer, GioHangItem>) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new LinkedHashMap<>();
+            session.setAttribute("cart", cart);
+        }
+
+        // 2. Xử lý các hành động (Action)
+        if (action != null) {
             try {
-                int id = Integer.parseInt(req.getParameter("id"));
-                User user = (User) req.getSession().getAttribute("currentUser");
-                int userId = (user != null) ? user.getId() : 1;
-                repo.banThuoc(id, userId);
-                req.getSession().setAttribute("message", "Đã bán 1 đơn vị thuốc!");
-                req.getSession().setAttribute("messageType", "success");
+                switch (action) {
+                    case "add":
+                        int idAdd = Integer.parseInt(req.getParameter("id"));
+                        if (cart.containsKey(idAdd)) {
+                            GioHangItem item = cart.get(idAdd);
+                            // Chỉ cho tăng nếu chưa vượt quá tồn kho
+                            if (item.getSoLuong() < item.getThuoc().getSoLuongTon()) {
+                                item.setSoLuong(item.getSoLuong() + 1);
+                                item.setThanhTien(item.getSoLuong() * item.getThuoc().getThuocCha().getGiaBanMacDinh());
+                            }
+                        } else {
+                            Thuoc t = repo.getById(idAdd);
+                            if (t != null && t.getSoLuongTon() > 0) {
+                                cart.put(idAdd, new GioHangItem(t, 1));
+                            }
+                        }
+                        break;
+
+                    case "update":
+                        int idUp = Integer.parseInt(req.getParameter("id"));
+                        int num = Integer.parseInt(req.getParameter("num"));
+                        if (cart.containsKey(idUp)) {
+                            GioHangItem item = cart.get(idUp);
+                            int newQty = item.getSoLuong() + num;
+
+                            if (newQty < 1) {
+                                cart.remove(idUp);
+                            } else if (newQty <= item.getThuoc().getSoLuongTon()) {
+                                item.setSoLuong(newQty);
+                                item.setThanhTien(newQty * item.getThuoc().getThuocCha().getGiaBanMacDinh());
+                            } else {
+                                session.setAttribute("message", "Kho chỉ còn " + item.getThuoc().getSoLuongTon() + " sản phẩm!");
+                                session.setAttribute("messageType", "warning");
+                            }
+                        }
+                        break;
+
+                    case "remove":
+                        int idRem = Integer.parseInt(req.getParameter("id"));
+                        cart.remove(idRem);
+                        break;
+
+                    case "clear":
+                        cart.clear(); // Làm trống thay vì remove session để giữ lại object cart
+                        break;
+                }
             } catch (Exception e) {
-                req.getSession().setAttribute("message", "Lỗi: " + e.getMessage());
-                req.getSession().setAttribute("messageType", "danger");
+                e.printStackTrace();
             }
             resp.sendRedirect("ban-hang");
             return;
         }
 
-
-        // 2. LOGIC BÁN HÀNG GỐC
-        if (search == null) search = "";
-
-        req.setAttribute("listThuoc", repo.getThuocDangConHang(search));
-        req.setAttribute("totalAmount", repo.getTotalStock());
-        req.setAttribute("warningCount", repo.countWarning());
-        req.setAttribute("expiredCount", repo.countExpired());
+        // 3. Hiển thị dữ liệu
+        String search = req.getParameter("txtSearch");
+        req.setAttribute("listThuoc", repo.getThuocDangConHang(search == null ? "" : search));
         req.setAttribute("lastSearch", search);
 
-        // Xử lý message thông báo
-        HttpSession session = req.getSession();
+        // Hiển thị thông báo (nếu có)
         if (session.getAttribute("message") != null) {
             req.setAttribute("message", session.getAttribute("message"));
             req.setAttribute("messageType", session.getAttribute("messageType"));
             session.removeAttribute("message");
-            session.removeAttribute("messageType");
         }
 
         req.getRequestDispatcher("/WEB-INF/views/ban-hang.jsp").forward(req, resp);
@@ -59,28 +100,25 @@ public class BanHangServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8"); // Chống lỗi font khi xử lý dữ liệu
-        String action = req.getParameter("action");
+        req.setCharacterEncoding("UTF-8");
         HttpSession session = req.getSession();
+        Map<Integer, GioHangItem> cart = (Map<Integer, GioHangItem>) session.getAttribute("cart");
 
-        if ("sell".equals(action)) {
+        if (cart != null && !cart.isEmpty()) {
             try {
-                int id = Integer.parseInt(req.getParameter("id"));
                 User user = (User) session.getAttribute("currentUser");
-                int userId = (user != null) ? user.getId() : 1;
+                int userId = (user != null) ? user.getId() : 1; // Default về admin nếu chưa login
 
-                // Gọi hàm banThuoc có kiểm tra hạn sử dụng (như đã sửa ở ThuocRepository trước đó)
-                // Lưu ý: Đảm bảo ThuocRepository.banThuoc trả về String hoặc ném Exception nếu hết hạn
-                repo.banThuoc(id, userId);
+                repo.thanhToan(cart, userId);
 
-                session.setAttribute("message", "Bán hàng thành công! Kho đã được cập nhật.");
+                session.setAttribute("message", "Thanh toán thành công!");
                 session.setAttribute("messageType", "success");
+                cart.clear(); // Xóa giỏ sau khi bán
             } catch (Exception e) {
-                // Nếu lỗi do hết hạn hoặc hết hàng, e.getMessage() sẽ hiển thị thông báo đó
-                session.setAttribute("message", "Giao dịch thất bại: " + e.getMessage());
+                session.setAttribute("message", "Lỗi: " + e.getMessage());
                 session.setAttribute("messageType", "danger");
             }
         }
-        resp.sendRedirect(req.getContextPath() + "/ban-hang");
+        resp.sendRedirect("ban-hang");
     }
 }

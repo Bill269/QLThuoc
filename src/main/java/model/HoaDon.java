@@ -1,6 +1,8 @@
 package model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HoaDon {
     private int id;
@@ -20,7 +22,16 @@ public class HoaDon {
         this.ngayLap = ngayLap;
         this.idUser = idUser;
     }
+    // Trong file model/HoaDon.java
+    private List<ChiTietHoaDon> chiTietList = new ArrayList<>();
 
+    public List<ChiTietHoaDon> getChiTietList() {
+        return chiTietList;
+    }
+
+    public void setChiTietList(List<ChiTietHoaDon> chiTietList) {
+        this.chiTietList = chiTietList;
+    }
     // Getter và Setter
     public int getId() {
         return id;

@@ -1,13 +1,12 @@
 package repository;
 
 import helper.DbConnector;
-import model.Thuoc;
-import model.ThuocCha;
-import model.LoaiThuoc;
-import model.DonViTinh;
+import model.*;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ThuocRepository {
 
@@ -256,5 +255,40 @@ public class ThuocRepository {
         return list;
     }
 
+    public void thanhToan(Map<Integer, GioHangItem> cart, int userId) throws Exception {
+        Connection conn = DbConnector.getConnection();
+        try {
+            conn.setAutoCommit(false);
 
+            // 1. Tạo hóa đơn
+            String sqlHD = "INSERT INTO HOA_DON (NGAY_LAP, ID_USER) OUTPUT INSERTED.ID VALUES (GETDATE(), ?)";
+            PreparedStatement psHD = conn.prepareStatement(sqlHD);
+            psHD.setInt(1, userId);
+            ResultSet rs = psHD.executeQuery();
+            int hoaDonId = (rs.next()) ? rs.getInt(1) : 0;
+
+            // 2. Lưu chi tiết & Trừ kho
+            for (GioHangItem item : cart.values()) {
+                // Lưu chi tiết (Ghi nhận số lượng bán thực tế)
+                String sqlCT = "INSERT INTO CHI_TIET_HOA_DON (ID_HOA_DON, ID_THUOC, SO_LUONG, GIA_LUC_BAN) VALUES (?, ?, ?, ?)";
+                PreparedStatement psCT = conn.prepareStatement(sqlCT);
+                psCT.setInt(1, hoaDonId);
+                psCT.setInt(2, item.getThuoc().getId());
+                psCT.setInt(3, item.getSoLuong()); // Dùng số lượng từ giỏ hàng
+                psCT.setDouble(4, item.getThuoc().getThuocCha().getGiaBanMacDinh());
+                psCT.executeUpdate();
+
+                // Trừ số lượng tồn trong bảng THUOC
+                String sqlUpdate = "UPDATE THUOC SET SO_LUONG_TON = SO_LUONG_TON - ? WHERE ID = ?";
+                PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate);
+                psUpdate.setInt(1, item.getSoLuong()); // Trừ đúng số lượng đã chọn
+                psUpdate.setInt(2, item.getThuoc().getId());
+                psUpdate.executeUpdate();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw e;
+        } finally { conn.close(); }
+    }
 }
