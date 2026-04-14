@@ -10,8 +10,5 @@
         <module name="AssmJav101" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="AssmJav101" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
