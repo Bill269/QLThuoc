@@ -23,7 +23,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Số lượng nhập</label>
-                    <input type="number" name="soLuong" class="form-control" required min="1" placeholder="Ví dụ: 100">
+                    <input type="number" name="soLuong" id="soLuong" value="${thuocToEdit.soLuongTon}" class="form-control" required min="1" placeholder="Ví dụ: 100">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Hạn sử dụng</label>

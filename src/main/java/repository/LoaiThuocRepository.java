@@ -98,4 +98,20 @@ public class LoaiThuocRepository {
         }
         return false;
     }
+
+    // Thêm hàm này vào LoaiThuocRepository.java
+    public boolean isTenLoaiExists(String tenLoai, Integer id) {
+        // Nếu id != null là đang check cho update, nếu id == null là check cho insert
+        String sql = (id == null)
+                ? "SELECT COUNT(*) FROM LOAI_THUOC WHERE TEN_LOAI = ?"
+                : "SELECT COUNT(*) FROM LOAI_THUOC WHERE TEN_LOAI = ? AND ID != ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, tenLoai);
+            if (id != null) ps.setInt(2, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
 }

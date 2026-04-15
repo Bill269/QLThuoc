@@ -13,12 +13,15 @@
     <div class="card shadow" style="max-width: 600px; margin: auto;">
         <div class="card-header bg-warning text-white"><h3><i class="fas fa-edit"></i> Sửa Thông Tin Thuốc</h3></div>
         <div class="card-body">
-            <form action="thuoc?action=update" method="post">
+            <%-- Thêm id="editThuocForm" để xử lý Javascript --%>
+            <form id="editThuocForm" action="thuoc?action=update" method="post">
                 <input type="hidden" name="id" value="${detail_thuoc_cha.id}">
+
                 <div class="mb-3">
                     <label class="form-label fw-bold">Tên dược phẩm</label>
-                    <input type="text" name="tenThuoc" value="${detail_thuoc_cha.ten_thuoc_cha}" class="form-control" required>
+                    <input type="text" name="tenThuoc" id="tenThuoc" value="${detail_thuoc_cha.ten_thuoc_cha}" class="form-control">
                 </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Loại thuốc</label>
@@ -37,18 +40,65 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label fw-bold">Giá bán mặc định</label>
-                    <input type="number" name="giaBan" value="${detail_thuoc_cha.gia_mac_dinh}" class="form-control" min="0" required>
+                    <input type="number" name="giaBan" id="giaBan" value="${detail_thuoc_cha.gia_mac_dinh}" class="form-control">
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Tình trạng</label>
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="radio" name="tinhTrang" id="statusTrue" value="true" ${detail_thuoc_cha.tinh_trang ? 'checked' : ''}>
+                                <label class="form-check-label" for="statusTrue">Còn bán</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tinhTrang" id="statusFalse" value="false" ${!detail_thuoc_cha.tinh_trang ? 'checked' : ''}>
+                                <label class="form-check-label" for="statusFalse">Ngưng bán</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Hạn dùng</label>
+                        <select name="hanDung" class="form-select">
+                            <option value="">-- Chọn hạn dùng --</option>
+                            <c:forEach var="hd" items="${listHanDung}">
+                                <option value="${hd}" ${detail_thuoc_cha.hanDung == hd ? 'selected' : ''}>${hd}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="mb-3">
-                    <label class="form-label d-block fw-bold">Tình trạng</label>
-                    <input type="radio" name="tinhTrang" value="true" ${detail_thuoc_cha.tinh_trang ? 'checked' : ''}> Còn bán
-                    <input type="radio" name="tinhTrang" value="false" class="ms-3" ${!detail_thuoc_cha.tinh_trang ? 'checked' : ''}> Ngưng bán
+                    <label class="form-label fw-bold">Mô tả thuốc</label>
+                    <%-- Dùng input type="text" để dễ hiện bong bóng lỗi như mẫu --%>
+                    <input type="text" name="moTa" id="moTa" value="${detail_thuoc_cha.moTa}" class="form-control">
                 </div>
+
                 <button type="submit" class="btn btn-warning w-100 text-white fw-bold">Cập nhật</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    window.onload = function() {
+        var errorMsg = "${error}";
+        if (errorMsg !== "") {
+            var inputId = "tenThuoc";
+            if (errorMsg.includes("Mô tả")) inputId = "moTa";
+            if (errorMsg.includes("Giá")) inputId = "giaBan";
+
+            var input = document.getElementById(inputId);
+            if (input) {
+                input.setCustomValidity(errorMsg);
+                input.reportValidity();
+                input.oninput = function() { this.setCustomValidity(""); };
+            }
+        }
+    };
+</script>
+
 <%@ include file="fragment/footer.jsp" %>

@@ -105,4 +105,15 @@ public class UserRepository {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+
+    public boolean isUsernameExists(String username) {
+        String sql = "SELECT COUNT(*) FROM NGUOIDUNG WHERE TEN_DANG_NHAP = ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
 }

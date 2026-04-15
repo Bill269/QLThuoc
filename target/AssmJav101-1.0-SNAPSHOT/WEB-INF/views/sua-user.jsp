@@ -24,7 +24,11 @@
 
             <div style="margin-bottom: 18px;">
                 <label style="display: block; font-weight: 600; color: #444; margin-bottom: 8px;">Mật khẩu</label>
-                <input type="password" name="password" value="${userToEdit.matKhau}" required
+                <input type="password" name="password" id="passwordEdit" value="${userToEdit.matKhau}" required
+                       minlength="5"
+                       maxlength="10"
+                       oninvalid="this.setCustomValidity('Mật khẩu phải từ 3 ký tự trở lên')"
+                       oninput="this.setCustomValidity('')"
                        style="width:100%; padding:12px; border:1px solid #dcdde1; border-radius:8px; outline: none;">
             </div>
 
@@ -71,5 +75,29 @@
         </form>
     </div>
 </div>
+
+<input type="hidden" name="isUpdate" value="true">
+
+<script>
+    window.onload = function() {
+        var errorMsg = "${error}";
+        if (errorMsg !== "") {
+            // Hiển thị bong bóng lỗi từ server nếu có
+            var input = document.getElementById("passwordEdit");
+            if (input) {
+                input.setCustomValidity(errorMsg);
+                input.reportValidity();
+                input.oninput = function() {
+                    this.setCustomValidity("");
+                };
+            }
+        }
+    };
+
+    // Chặn submit nếu form không hợp lệ (Trình duyệt tự xử lý dựa trên required/minlength)
+    document.getElementById("editUserForm").onsubmit = function(e) {
+        // Form sẽ tự chặn load trang và hiện bong bóng nếu mật khẩu < 6 ký tự
+    };
+</script>
 
 <%@ include file="fragment/footer.jsp" %>

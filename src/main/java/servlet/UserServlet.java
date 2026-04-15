@@ -43,14 +43,46 @@ public class UserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         String idStr = req.getParameter("userId");
-        String isUpdateParam = req.getParameter("isUpdate"); // Lấy từ input hidden ở form thêm mới
+        String isUpdateParam = req.getParameter("isUpdate");
+        String username = req.getParameter("username");
+        String pass = req.getParameter("password");
 
-        // --- TRƯỜNG HỢP 1: CẬP NHẬT (UPDATE) ---
-        if (idStr != null && !idStr.isEmpty()) {
+        // Kiểm tra xem là hành động gì
+        boolean isAdd = "false".equals(isUpdateParam);
+        boolean isEdit = (idStr != null && !idStr.isEmpty());
+
+        String error = null;
+        String regex = "^[a-zA-Z0-9À-ỹ\\s]+$";
+
+        // --- CHỈ VALIDATE KHI THÊM HOẶC SỬA ---
+        if (isAdd || isEdit) {
+            if (username == null || username.trim().isEmpty()) {
+                error = "Tên đăng nhập không được để trống!";
+            } else if (username.length() > 5 && username.length() < 10) {
+                error = "Tên đăng nhập không được quá 10 ký tự và ít hơn 5 ký tự!";
+            } else if (!username.matches(regex)) {
+                error = "Tên không được chứa ký tự đặc biệt!";
+            } else if (pass == null || pass.length() < 3) {
+                error = "Mật khẩu phải có ít nhất 3 ký tự!";
+            } else if (isAdd && repo.isUsernameExists(username)) {
+                // Check trùng tên CHỈ khi thêm mới
+                error = "Tên đăng nhập này đã tồn tại!";
+            }
+
+            // Nếu có lỗi validate, trả về ngay lập tức
+            if (error != null) {
+                req.setAttribute("error", error);
+                req.setAttribute("oldUsername", username);
+                req.setAttribute("oldPassword", pass);
+                doGet(req, resp);
+                return;
+            }
+        }
+
+        // --- TRƯỜNG HỢP 1: CẬP NHẬT (UPDATE) --- (Giữ nguyên logic của bạn)
+        if (isEdit) {
             try {
                 int id = Integer.parseInt(idStr);
-                String username = req.getParameter("username");
-                String pass = req.getParameter("password");
                 String role = req.getParameter("role");
                 String statusStr = req.getParameter("trangThai");
                 boolean status = "1".equals(statusStr);
@@ -60,22 +92,22 @@ public class UserServlet extends HttpServlet {
                 return;
             } catch (Exception e) { e.printStackTrace(); }
         }
-        // --- TRƯỜNG HỢP 2: THÊM MỚI (INSERT) ---
-        if ("false".equals(isUpdateParam)) {
+
+        // --- TRƯỜNG HỢP 2: THÊM MỚI (INSERT) --- (Giữ nguyên logic của bạn)
+        if (isAdd) {
             try {
-                String username = req.getParameter("username");
-                String pass = req.getParameter("password");
                 String role = "USER";
-                User newUser = new User(0, username, pass, role, true); // Mặc định Hoạt động (true)
+                User newUser = new User(0, username, pass, role, true);
                 repo.save(newUser, false);
                 resp.sendRedirect("users");
                 return;
             } catch (Exception e) { e.printStackTrace(); }
         }
+
         // --- TRƯỜNG HỢP 3: ĐĂNG NHẬP (LOGIN) ---
         String user = req.getParameter("username");
-        String pass = req.getParameter("password");
-        User u = repo.login(user, pass);
+        String password = req.getParameter("password");
+        User u = repo.login(user, password);
         if (u != null) {
             if (u.isTrangThai()) {
                 HttpSession session = req.getSession();

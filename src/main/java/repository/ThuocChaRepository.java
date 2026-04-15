@@ -11,7 +11,6 @@ import java.util.List;
 public class ThuocChaRepository {
     public List<ThuocCha> getAll() {
         List<ThuocCha> list = new ArrayList<>();
-        // Thêm JOIN để lấy tên loại và đơn vị
         String sql = "SELECT tc.*, l.TEN_LOAI, d.TEN_DON_VI " +
                 "FROM THUOC_CHA tc " +
                 "LEFT JOIN LOAI_THUOC l ON tc.ID_LOAI = l.ID " +
@@ -20,16 +19,19 @@ public class ThuocChaRepository {
              Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
+                // Bổ sung lấy dữ liệu HanDung và MoTa vào Constructor
                 ThuocCha tc = new ThuocCha(
                         rs.getInt("ID"),
                         rs.getString("TEN_THUOC_CHA"),
                         rs.getInt("ID_LOAI"),
                         rs.getInt("ID_DON_VI"),
                         rs.getDouble("GIA_BAN_MAC_DINH"),
-                        rs.getBoolean("TINH_TRANG")
+                        rs.getBoolean("TINH_TRANG"),
+                        rs.getString("HAN_DUNG"), // Thêm ở đây
+                        rs.getString("MO_TA"),    // Thêm ở đây
+                        null, null // Placeholder cho LoaiThuoc và DonViTinh sẽ set sau
                 );
 
-                // Đổ dữ liệu vào object LoaiThuoc và DonViTinh
                 LoaiThuoc lt = new LoaiThuoc();
                 lt.setId(rs.getInt("ID_LOAI"));
                 lt.setTenLoai(rs.getString("TEN_LOAI"));
@@ -63,7 +65,10 @@ public class ThuocChaRepository {
                         rs.getInt("ID_LOAI"),
                         rs.getInt("ID_DON_VI"),
                         rs.getDouble("GIA_BAN_MAC_DINH"),
-                        rs.getBoolean("TINH_TRANG")
+                        rs.getBoolean("TINH_TRANG"),
+                        rs.getString("HAN_DUNG"), // Thêm ở đây
+                        rs.getString("MO_TA"),    // Thêm ở đây
+                        null, null
                 );
 
                 LoaiThuoc lt = new LoaiThuoc();
@@ -81,7 +86,8 @@ public class ThuocChaRepository {
     }
 
     public void add(ThuocCha tc) throws Exception {
-        String sql = "INSERT INTO THUOC_CHA (TEN_THUOC_CHA, ID_LOAI, ID_DON_VI, GIA_BAN_MAC_DINH, TINH_TRANG) VALUES(?,?,?,?,?)";
+        // Cập nhật câu SQL thêm HAN_DUNG và MO_TA
+        String sql = "INSERT INTO THUOC_CHA (TEN_THUOC_CHA, ID_LOAI, ID_DON_VI, GIA_BAN_MAC_DINH, TINH_TRANG, HAN_DUNG, MO_TA) VALUES(?,?,?,?,?,?,?)";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tc.getTen_thuoc_cha());
@@ -89,12 +95,15 @@ public class ThuocChaRepository {
             ps.setInt(3, tc.getId_don_vi());
             ps.setDouble(4, tc.getGia_mac_dinh());
             ps.setBoolean(5, tc.getTinh_trang());
+            ps.setString(6, tc.getHanDung()); // Thêm ở đây
+            ps.setString(7, tc.getMoTa());    // Thêm ở đây
             ps.executeUpdate();
         }
     }
 
     public void update(ThuocCha tc) throws Exception {
-        String sql = "UPDATE THUOC_CHA SET TEN_THUOC_CHA = ?, ID_LOAI = ?, ID_DON_VI = ?, GIA_BAN_MAC_DINH = ?, TINH_TRANG = ? WHERE ID = ?";
+        // Cập nhật câu SQL sửa HAN_DUNG và MO_TA
+        String sql = "UPDATE THUOC_CHA SET TEN_THUOC_CHA = ?, ID_LOAI = ?, ID_DON_VI = ?, GIA_BAN_MAC_DINH = ?, TINH_TRANG = ?, HAN_DUNG = ?, MO_TA = ? WHERE ID = ?";
         try (Connection con = DbConnector.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, tc.getTen_thuoc_cha());
@@ -102,7 +111,9 @@ public class ThuocChaRepository {
             ps.setInt(3, tc.getId_don_vi());
             ps.setDouble(4, tc.getGia_mac_dinh());
             ps.setBoolean(5, tc.getTinh_trang());
-            ps.setInt(6, tc.getId());
+            ps.setString(6, tc.getHanDung()); // Thêm ở đây
+            ps.setString(7, tc.getMoTa());    // Thêm ở đây
+            ps.setInt(8, tc.getId());
             ps.executeUpdate();
         }
     }
@@ -118,7 +129,6 @@ public class ThuocChaRepository {
 
     public List<ThuocCha> search(String timkiem) {
         List<ThuocCha> list = new ArrayList<>();
-        // Thêm JOIN để lấy TEN_LOAI và TEN_DON_VI khi tìm kiếm
         String sql = "SELECT tc.*, l.TEN_LOAI, d.TEN_DON_VI " +
                 "FROM THUOC_CHA tc " +
                 "LEFT JOIN LOAI_THUOC l ON tc.ID_LOAI = l.ID " +
@@ -137,16 +147,17 @@ public class ThuocChaRepository {
                         rs.getInt("ID_LOAI"),
                         rs.getInt("ID_DON_VI"),
                         rs.getDouble("GIA_BAN_MAC_DINH"),
-                        rs.getBoolean("TINH_TRANG")
+                        rs.getBoolean("TINH_TRANG"),
+                        rs.getString("HAN_DUNG"), // Thêm ở đây
+                        rs.getString("MO_TA"),    // Thêm ở đây
+                        null, null
                 );
 
-                // Khởi tạo và đổ dữ liệu cho đối tượng LoaiThuoc
                 LoaiThuoc lt = new LoaiThuoc();
                 lt.setId(rs.getInt("ID_LOAI"));
                 lt.setTenLoai(rs.getString("TEN_LOAI"));
                 tc.setLoaiThuoc(lt);
 
-                // Khởi tạo và đổ dữ liệu cho đối tượng DonViTinh
                 DonViTinh dv = new DonViTinh();
                 dv.setId(rs.getInt("ID_DON_VI"));
                 dv.setTenDonVi(rs.getString("TEN_DON_VI"));
@@ -154,9 +165,7 @@ public class ThuocChaRepository {
 
                 list.add(tc);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
@@ -224,5 +233,39 @@ public class ThuocChaRepository {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public List<String> getAllHanDung() {
+        List<String> list = new ArrayList<>();
+        // Lấy các giá trị hạn dùng khác nhau, loại bỏ các dòng null hoặc rỗng
+        String sql = "SELECT DISTINCT HAN_DUNG FROM THUOC_CHA " +
+                "WHERE HAN_DUNG IS NOT NULL AND HAN_DUNG <> '' " +
+                "ORDER BY HAN_DUNG ASC";
+
+        try (Connection con = DbConnector.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(rs.getString("HAN_DUNG"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean isTenThuocExists(String tenThuoc, Integer id) {
+        // Nếu id != null là đang sửa (Update), ngược lại là thêm mới (Add)
+        String sql = (id == null)
+                ? "SELECT COUNT(*) FROM THUOC_CHA WHERE TEN_THUOC_CHA = ?"
+                : "SELECT COUNT(*) FROM THUOC_CHA WHERE TEN_THUOC_CHA = ? AND ID <> ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, tenThuoc.trim());
+            if (id != null) ps.setInt(2, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
     }
 }

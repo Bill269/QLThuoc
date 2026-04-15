@@ -20,13 +20,22 @@
 
             <div>
                 <label style="display:block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 8px;">Tên đăng nhập</label>
-                <input type="text" name="username" placeholder="Nhập tên đăng nhập..." required
+                <input type="text" name="username" id="usernameAdd" value="${oldUsername}"
+                       placeholder="Nhập tên đăng nhập..." required
+                       minlength="5"
+                       maxlength="10"
+                       pattern="^[a-zA-Z0-9]+$"
+                       oninput="this.setCustomValidity('')"
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none;">
             </div>
 
             <div>
                 <label style="display:block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 8px;">Mật khẩu</label>
-                <input type="password" name="password" placeholder="Nhập mật khẩu..." required
+                <input type="password" name="password" id="passwordAdd" value="${oldPassword}"
+                       placeholder="Nhập mật khẩu..." required
+                       minlength="3"
+                       maxlength="6"
+                       oninput="this.setCustomValidity('')"
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none;">
             </div>
 
@@ -149,5 +158,43 @@
         </table>
     </div>
 </div>
+
+
+<script>
+    window.onload = function() {
+        var userInp = document.getElementById("usernameAdd");
+        var passInp = document.getElementById("passwordAdd");
+
+        // 1. Tự định nghĩa câu thông báo tiếng Việt khi gõ sai định dạng (Client-side)
+        userInp.oninvalid = function() {
+            if (this.validity.valueMissing) {
+                this.setCustomValidity("Vui lòng nhập tên đăng nhập!");
+            } else if (this.validity.patternMismatch) {
+                this.setCustomValidity("Tên từ 5-10 ký tự, không chứa ký tự đặc biệt!");
+            }
+        };
+
+        passInp.oninvalid = function() {
+            if (this.validity.valueMissing) {
+                this.setCustomValidity("Vui lòng nhập mật khẩu!");
+            } else if (this.validity.tooShort) {
+                this.setCustomValidity("Mật khẩu phải có ít nhất 3 ký tự!");
+            }
+        };
+
+        // 2. Hiển thị lỗi từ SERVER (Ví dụ: "Tên đăng nhập này đã tồn tại!")
+        var serverError = "${error}";
+        if (serverError !== "") {
+            // Xác định hiện bong bóng ở ô nào dựa trên nội dung lỗi
+            var targetInput = serverError.includes("Mật khẩu") ? passInp : userInp;
+
+            if (targetInput) {
+                // Gán lỗi từ server vào bong bóng và ép nó hiện lên
+                targetInput.setCustomValidity(serverError);
+                targetInput.reportValidity();
+            }
+        }
+    };
+</script>
 
 <%@ include file="fragment/footer.jsp" %>

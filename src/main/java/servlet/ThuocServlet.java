@@ -135,20 +135,33 @@ public class ThuocServlet extends HttpServlet {
     }
 
     private void insertThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        String soLuongStr = req.getParameter("soLuong");
+        int soLuong = 0;
+
+        try {
+            soLuong = Integer.parseInt(soLuongStr);
+        } catch (NumberFormatException e) {
+            soLuong = -1; // Đánh dấu lỗi nếu nhập chữ
+        }
+
+        // Kiểm tra số lượng phải lớn hơn 0
+        if (soLuong <= 0) {
+            // Chuyển hướng về lại trang add kèm thông báo lỗi
+            resp.sendRedirect("kho?action=add&error=invalid_quantity");
+            return;
+        }
+
+        // --- Nếu pass validate thì mới chạy tiếp đoạn code cũ của bạn ---
         int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
-        int soLuong = Integer.parseInt(req.getParameter("soLuong"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
         ThuocCha tc = new ThuocCha();
         tc.setId(idTenThuoc);
 
-        // Tạo đối tượng Thuoc
         Thuoc thuoc = new Thuoc();
         thuoc.setThuocCha(tc);
         thuoc.setSoLuongTon(soLuong);
         thuoc.setHanSuDung(hanSD);
-
-        // TỰ ĐỘNG GÁN NGÀY HÔM NAY
         thuoc.setNgayNhapThuoc(new Date());
 
         repository.add(thuoc);
@@ -156,11 +169,26 @@ public class ThuocServlet extends HttpServlet {
     }
 
     private void updateThuoc(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        // 1. Lấy ID trước để nếu có lỗi còn biết đường quay lại đúng trang sửa
         int id = Integer.parseInt(req.getParameter("id"));
-        int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
-        int soLuong = Integer.parseInt(req.getParameter("soLuong"));
 
-        // LẤY NGÀY NHẬP TỪ FORM (Ô input name="ngayNhap" bạn vừa thêm ở JSP)
+        // 2. Lấy số lượng và kiểm tra
+        String soLuongStr = req.getParameter("soLuong");
+        int soLuong = 0;
+        try {
+            soLuong = Integer.parseInt(soLuongStr);
+        } catch (NumberFormatException e) {
+            soLuong = -1;
+        }
+
+        // 3. Validate: Nếu số lượng <= 0, đá về trang edit của chính ID đó
+        if (soLuong <= 0) {
+            resp.sendRedirect("kho?action=edit&id=" + id + "&error=invalid_quantity");
+            return;
+        }
+
+        // --- Nếu pass validate thì thực hiện logic cũ ---
+        int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
         Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
         Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
@@ -171,10 +199,10 @@ public class ThuocServlet extends HttpServlet {
         thuoc.setId(id);
         thuoc.setThuocCha(tc);
         thuoc.setSoLuongTon(soLuong);
-        thuoc.setNgayNhapThuoc(ngayNhap); // Đưa ngày nhập vào đối tượng để update
+        thuoc.setNgayNhapThuoc(ngayNhap);
         thuoc.setHanSuDung(hanSD);
 
-        repository.update(thuoc); // Đảm bảo hàm update trong Repo của bạn có câu lệnh SQL cập nhật NGAY_NHAP_THUOC
+        repository.update(thuoc);
         resp.sendRedirect("kho?msg=updated");
     }
 

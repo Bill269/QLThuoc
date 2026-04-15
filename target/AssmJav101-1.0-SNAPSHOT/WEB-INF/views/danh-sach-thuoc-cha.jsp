@@ -49,6 +49,8 @@
                 <th>Giá Bán</th>
                 <th>Đơn vị</th>
                 <th>Tình Trạng</th>
+                <th>Hạn dùng</th>
+                <th>Mô tả</th>
                 <th>Thao Tác</th>
             </tr>
             </thead>
@@ -65,6 +67,8 @@
                                     ${t.tinh_trang ? 'Còn bán' : 'Ngưng bán'}
                             </span>
                     </td>
+                    <td>${t.hanDung}</td>
+                    <td>${t.moTa}</td>
                     <td>
                         <a href="thuoc?action=detail&id=${t.id}" class="btn btn-sm btn-info text-white"><i class="fas fa-eye"></i></a>
                         <a href="thuoc?action=edit_form&id=${t.id}" class="btn btn-sm btn-warning text-white"><i class="fas fa-edit"></i></a>

@@ -29,8 +29,17 @@
                         <form action="loai-thuoc?action=insert" method="post">
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-uppercase text-muted">Tên loại thuốc</label>
-                                <input type="text" name="tenLoai" class="form-control form-control-lg"
-                                       placeholder="Ví dụ: Thuốc hạ sốt" required>
+                                <input type="text" name="tenLoai" id="tenLoaiAdd"
+                                       class="form-control form-control-lg"
+                                       value="${param.tenLoai}"
+                                       placeholder="Ví dụ: Thuốc hạ sốt" required
+                                       minlength="5"
+                                       maxlength="40"
+                                       pattern="^[a-zA-Z0-9À-ỹ]+$"
+                                       oninput="this.setCustomValidity('')">
+                                <small class="text-muted" style="font-size: 0.8em; display: block; mt-1;">
+                                    (Trên 5 dưới 40 ký tự, không chứa khoảng trắng hoặc ký tự đặc biệt)
+                                </small>
                                 <br>
                                 <label class="form-label small fw-bold text-uppercase text-muted">Trạng thái</label>
                                 <div class="d-flex gap-3 mt-1 mb-3">
@@ -134,8 +143,16 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-bold text-muted small text-uppercase">Tên loại thuốc mới</label>
-                        <input type="text" name="tenLoai" id="editTen" class="form-control form-control-lg border-2"
-                               placeholder="Nhập tên mới..." required>
+                        <input type="text" name="tenLoai" id="editTen"
+                               class="form-control form-control-lg border-2"
+                               placeholder="Nhập tên mới..." required
+                               minlength="5"
+                               maxlength="40"
+                               pattern="^[a-zA-Z0-9À-ỹ]+$"
+                               oninput="this.setCustomValidity('')">
+                        <small class="text-muted" style="font-size: 0.8em; display: block; margin-top: 5px;">
+                            (Trên 5 dưới 40 ký tự, không chứa khoảng trắng hoặc ký tự đặc biệt)
+                        </small>
                     </div>
 
                     <div class="mb-2">
@@ -169,7 +186,7 @@
 </div>
 
 <script>
-    // Tìm kiếm nhanh
+    // 1. TÌM KIẾM NHANH (Giữ nguyên)
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toLowerCase();
         let rows = document.querySelectorAll('#categoryTable tbody tr');
@@ -182,16 +199,87 @@
         });
     });
 
+    // 2. HÀM MỞ MODAL VÀ ĐIỀN DỮ LIỆU
     function openEditModal(id, ten, trangthai) {
         document.getElementById('editId').value = id;
-        document.getElementById('editTen').value = ten;
+        var editInp = document.getElementById('editTen');
+        editInp.value = ten;
+
+        // Quan trọng: Khi mở modal mới, xóa bỏ mọi đánh dấu lỗi cũ
+        editInp.setCustomValidity("");
+        editInp.removeAttribute("data-server-error");
+
         if(trangthai == true || trangthai == "true"){
             document.getElementById('editTrangThaiTrue').checked = true;
-        }else{
+        } else {
             document.getElementById('editTrangThaiFalse').checked = true;
         }
         new bootstrap.Modal(document.getElementById('editModal')).show();
     }
+
+    // 3. XỬ LÝ KHI TRANG LOAD
+    window.onload = function() {
+        var userInp = document.getElementById("tenLoaiAdd");
+        var editInp = document.getElementById("editTen");
+
+        var serverError = "${sessionScope.error}";
+        <% session.removeAttribute("error"); %>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+
+        if (serverError !== "") {
+            if (action === 'edit') {
+                var modal = new bootstrap.Modal(document.getElementById('editModal'));
+                modal.show();
+
+                setTimeout(() => {
+                    if (editInp) {
+                        // Đánh dấu đây là lỗi từ Server để không bị Client-side ghi đè
+                        editInp.setAttribute("data-server-error", "true");
+                        editInp.setCustomValidity(serverError);
+                        editInp.reportValidity();
+                    }
+                }, 500);
+            } else {
+                if (userInp) {
+                    userInp.setAttribute("data-server-error", "true");
+                    userInp.setCustomValidity(serverError);
+                    userInp.reportValidity();
+                }
+            }
+        }
+
+        // 4. KIỂM TRA LỖI ĐỊNH DẠNG (Có ưu tiên lỗi Server)
+        [userInp, editInp].forEach(inp => {
+            if(!inp) return;
+
+            inp.oninvalid = function() {
+                // Nếu đang có lỗi "Tên đã tồn tại" từ Server, không cho các lỗi khác ghi đè lên
+                if (this.getAttribute("data-server-error") === "true") {
+                    return;
+                }
+
+                this.setCustomValidity("");
+
+                if (this.validity.valueMissing) {
+                    this.setCustomValidity("Vui lòng không để trống tên loại thuốc!");
+                }
+                else if (this.validity.patternMismatch) {
+                    this.setCustomValidity("Tên loại không được chứa ký tự đặc biệt!");
+                }
+                else if (this.value.length <= 5 || this.value.length >= 40) {
+                    this.setCustomValidity("Tên loại phải trên 5 và dưới 40 ký tự!");
+                }
+            };
+
+            inp.oninput = function() {
+                // Khi người dùng bắt đầu gõ, xóa đánh dấu lỗi Server để các check khác hoạt động lại
+                this.setCustomValidity("");
+                this.removeAttribute("data-server-error");
+            };
+        });
+    };
 </script>
 
 <%@ include file="fragment/footer.jsp" %>

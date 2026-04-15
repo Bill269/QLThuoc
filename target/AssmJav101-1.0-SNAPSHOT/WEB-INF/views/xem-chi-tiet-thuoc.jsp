@@ -40,6 +40,24 @@
                         ${detail_thuoc_cha.tinh_trang ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}
                     </span>
                 </li>
+                <li class="list-group-item d-flex justify-content-between">
+                        <strong>Hạn dùng</strong>
+                        <span class="badge ${detail_thuoc_cha.hanDung}">
+                        </span>
+                </li>
+                    <li class="list-group-item">
+                        <div class="fw-bold mb-2">Mô tả chi tiết:</div>
+                        <div class="text-secondary ps-2" style="white-space: pre-wrap; line-height: 1.6; border-left: 3px solid #dee2e6;">
+                            <c:choose>
+                                <c:when test="${not empty detail_thuoc_cha.moTa}">
+                                    ${detail_thuoc_cha.moTa}
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="text-muted italic">Không có mô tả cho dược phẩm này.</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </li>
             </ul>
             <div class="mt-4 d-flex gap-2">
                 <a href="thuoc" class="btn btn-outline-primary flex-grow-1">Quay về</a>
