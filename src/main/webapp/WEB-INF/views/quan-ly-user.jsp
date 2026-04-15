@@ -17,23 +17,28 @@
         </h4>
         <form action="users" method="post" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
             <input type="hidden" name="isUpdate" value="false">
+
             <div>
                 <label style="display:block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 8px;">Tên đăng nhập</label>
                 <input type="text" name="username" placeholder="Nhập tên đăng nhập..." required
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none;">
             </div>
+
             <div>
                 <label style="display:block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 8px;">Mật khẩu</label>
                 <input type="password" name="password" placeholder="Nhập mật khẩu..." required
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none;">
             </div>
+
             <div>
                 <label style="display:block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 8px;">Nhóm quyền</label>
-                <select name="role" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">
-                    <option value="USER">USER (Người dùng)</option>
+                <select disabled style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #888; cursor: not-allowed;">
+                    <option value="USER" selected>USER (Người dùng)</option>
                     <option value="ADMIN">ADMIN (Quản trị)</option>
                 </select>
+                <input type="hidden" name="role" value="USER">
             </div>
+
             <button type="submit" style="background: var(--primary-dark); color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s;">
                 <i class="fas fa-plus"></i> Thêm mới
             </button>
@@ -62,6 +67,7 @@
             <tr style="background: var(--primary-dark); color: white; text-align: left;">
                 <th style="padding: 15px 20px;">Tên đăng nhập</th>
                 <th style="padding: 15px 20px;">Quyền hạn</th>
+                <th style="padding: 15px 20px;">Trạng thái</th>
                 <th style="padding: 15px 20px; text-align: center;">Thao tác</th>
             </tr>
             </thead>
@@ -85,31 +91,56 @@
                             </c:otherwise>
                         </c:choose>
                     </td>
+
+                    <td style="padding: 15px 20px;">
+                        <c:choose>
+                            <c:when test="${u.trangThai}">
+                                <span style="color: #27ae60; font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Hoạt động
+                                </span>
+                            </c:when>
+                            <c:otherwise>
+                                <span style="color: #e74c3c; font-weight: 600;">
+                                    <i class="fas fa-lock"></i> Đã khóa
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+
                     <td style="padding: 15px 20px; text-align: center;">
                         <div style="display: flex; justify-content: center; gap: 10px;">
                             <a href="users?action=edit&id=${u.id}"
                                style="background: #fff8e1; color: #f57f17; padding: 7px 14px; border: 1px solid #ffecb3; border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: 600; transition: 0.2s;">
                                 <i class="fas fa-edit"></i> Sửa
                             </a>
-                            <c:if test="${u.tenDangNhap ne currentUser.tenDangNhap}">
-                                <a href="users?action=delete&id=${u.id}"
-                                   onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản ${u.tenDangNhap}?')"
-                                   style="background: #fff5f5; color: #e74c3c; padding: 7px 14px; border: 1px solid #ffcccc; border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: 600; transition: 0.2s;">
-                                    <i class="fas fa-trash-alt"></i> Xóa
-                                </a>
-                            </c:if>
-                            <c:if test="${u.tenDangNhap eq currentUser.tenDangNhap}">
-                                <span style="color: #bbb; font-size: 0.85em; font-style: italic; padding: 7px;">
-                                    (Đang dùng)
-                                </span>
-                            </c:if>
+
+                            <c:choose>
+                                <c:when test="${u.tenDangNhap eq currentUser.tenDangNhap}">
+                                    <span style="color: #bbb; font-size: 0.85em; font-style: italic; padding: 7px;">
+                                        (Đang dùng)
+                                    </span>
+                                </c:when>
+                                <c:when test="${u.nhomQuyen eq 'ADMIN'}">
+                                    <span style="color: #bbb; font-size: 0.85em; font-style: italic; padding: 7px;">
+                                        (Hệ thống)
+                                    </span>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="users?action=delete&id=${u.id}"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản ${u.tenDangNhap}?')"
+                                       style="background: #fff5f5; color: #e74c3c; padding: 7px 14px; border: 1px solid #ffcccc; border-radius: 6px; text-decoration: none; font-size: 0.85em; font-weight: 600; transition: 0.2s;">
+                                        <i class="fas fa-trash-alt"></i> Xóa
+                                    </a>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </td>
                 </tr>
             </c:forEach>
+
             <c:if test="${empty userList}">
                 <tr>
-                    <td colspan="3" style="text-align: center; padding: 40px; color: #999;">
+                    <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
                         Không tìm thấy tài khoản nào phù hợp.
                     </td>
                 </tr>

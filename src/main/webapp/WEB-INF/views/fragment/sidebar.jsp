@@ -110,13 +110,9 @@
                class="sidebar-link ${fn:contains(request.getRequestURI(), '/users') ? 'active' : ''}">
                 <i class="fas fa-users-cog"></i> <span>Tài Khoản</span>
             </a>
-            <a href="${pageContext.request.contextPath}/send-email"
-               class="sidebar-link ${fn:contains(request.getRequestURI(), '/send-email') ? 'active' : ''}">
-                <i class="fas fa-envelope"></i> <span>Gửi Email</span>
-            </a>
             <a href="${pageContext.request.contextPath}/thuoc"
-               class="sidebar-link ${fn:contains(request.getRequestURI(), '/thuoc') ? 'active' : ''}">
-                <i class="fas fa-envelope"></i> <span>Thuốc</span>
+               class="sidebar-link ${fn:contains(request.getRequestURI(), '/users') ? 'active' : ''}">
+                <i class="fas fa-pills"></i> <span>Thuốc</span>
             </a>
         </c:if>
     </div>

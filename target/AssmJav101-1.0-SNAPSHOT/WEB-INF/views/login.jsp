@@ -59,10 +59,13 @@
             outline: none;
         }
 
+        /* Giữ nguyên class error-message cũ của bạn */
         .error-message {
             color: #e74c3c;
             margin-bottom: 20px;
             font-weight: 600;
+            font-size: 0.9em;
+            min-height: 1em; /* Giữ chỗ để không bị nhảy khung khi hiện lỗi */
         }
 
         .login-btn {
@@ -88,9 +91,10 @@
     <h1>Đăng Nhập</h1>
 
     <div class="error-message">
-        ${requestScope.error}
+        <c:if test="${not empty error}">
+            ${error}
+        </c:if>
     </div>
-
     <form action="login" method="post">
         <div class="input-group">
             <label for="username">Tên đăng nhập</label>
@@ -101,12 +105,10 @@
                    placeholder="Nhập tên đăng nhập"
                    value="${savedUsername}">
         </div>
-
         <div class="input-group">
             <label for="password">Mật khẩu</label>
             <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
         </div>
-
         <input type="submit" value="Đăng Nhập" class="login-btn">
     </form>
 </div>
