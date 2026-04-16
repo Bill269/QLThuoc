@@ -4,23 +4,31 @@ public class ChiTietHoaDon {
     private int idHoaDon;
     private int idThuoc;
     private int soLuong;
+    private double giaLucBan;
 
     // Các trường hỗ trợ hiển thị tên thuốc và loại thuốc trên giao diện
     private String tenThuoc;
     private String loaiThuoc;
+
 
     // Constructor mặc định
     public ChiTietHoaDon() {
     }
 
     // Constructor đầy đủ
-    public ChiTietHoaDon(int idHoaDon, int idThuoc, int soLuong) {
+
+    public ChiTietHoaDon(int idHoaDon, int idThuoc, int soLuong, double giaLucBan) {
         this.idHoaDon = idHoaDon;
         this.idThuoc = idThuoc;
         this.soLuong = soLuong;
+        this.giaLucBan = giaLucBan;
+    }
+    public double getThanhTien() {
+        return this.soLuong * this.giaLucBan;
     }
 
     // Getter và Setter
+
     public int getIdHoaDon() {
         return idHoaDon;
     }
@@ -43,6 +51,14 @@ public class ChiTietHoaDon {
 
     public void setSoLuong(int soLuong) {
         this.soLuong = soLuong;
+    }
+
+    public double getGiaLucBan() {
+        return giaLucBan;
+    }
+
+    public void setGiaLucBan(double giaLucBan) {
+        this.giaLucBan = giaLucBan;
     }
 
     public String getTenThuoc() {
