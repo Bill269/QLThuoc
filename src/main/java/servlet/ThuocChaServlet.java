@@ -100,7 +100,7 @@ public class ThuocChaServlet extends HttpServlet {
         } catch (Exception e) { giaBan = -1.0; }
 
         String error = null;
-        String regex = "^[a-zA-Z0-9À-ỹ\\s]+$"; // Không khoảng trắng, không ký tự đặc biệt
+        String regex = "^[a-zA-Z0-9A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠƯÀẢÃẠẰẮẲẴẶẦẤẨẪẬÈẺẼẸỀẾỂỄỆÌỈĨỊÒỎÕỌỜỚỞỠỢỒỐỔỖỘÙỦŨỤỪỨỬỮỰỲỶỸỴ\\s,().\\-]+$"; // Không khoảng trắng, không ký tự đặc biệt
         Integer currentId = (idStr != null && !idStr.isEmpty()) ? Integer.parseInt(idStr) : null;
 
         // --- BỘ LỌC VALIDATE THEO THỨ TỰ ƯU TIÊN ---

@@ -58,8 +58,8 @@ public class UserServlet extends HttpServlet {
         if (isAdd || isEdit) {
             if (username == null || username.trim().isEmpty()) {
                 error = "Tên đăng nhập không được để trống!";
-            } else if (username.length() > 5 && username.length() < 10) {
-                error = "Tên đăng nhập không được quá 10 ký tự và ít hơn 5 ký tự!";
+            } else if (username.length() < 5 || username.length() > 10) {
+                error = "Tên đăng nhập phải từ 5 đến 10 ký tự!";
             } else if (!username.matches(regex)) {
                 error = "Tên không được chứa ký tự đặc biệt!";
             } else if (pass == null || pass.length() < 3) {

@@ -169,8 +169,10 @@
         userInp.oninvalid = function() {
             if (this.validity.valueMissing) {
                 this.setCustomValidity("Vui lòng nhập tên đăng nhập!");
+            } else if (this.validity.tooShort || this.validity.tooLong) {
+                this.setCustomValidity("Tên đăng nhập phải có độ dài từ 5 đến 10 ký tự!");
             } else if (this.validity.patternMismatch) {
-                this.setCustomValidity("Tên từ 5-10 ký tự, không chứa ký tự đặc biệt!");
+                this.setCustomValidity("Tên đăng nhập không được chứa ký tự đặc biệt và khoảng trắng!");
             }
         };
 

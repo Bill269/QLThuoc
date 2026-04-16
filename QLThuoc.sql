@@ -107,3 +107,19 @@ select * from NGUOIDUNG
 ALTER TABLE NGUOIDUNG
 ADD TRANG_THAI BIT NOT NULL DEFAULT 1;
 GO
+select * from hoa_don 
+ALTER TABLE HOA_DON
+ADD TenKhachHang NVARCHAR(100),
+    SoDienThoai VARCHAR(15),
+    Email VARCHAR(100),
+    DiaChi NVARCHAR(255);
+GO
+
+-- Chạy lệnh này để kiểm tra xem các cột đã xuất hiện chưa
+SELECT TOP 1 * FROM HOA_DON;
+UPDATE HOA_DON 
+SET TenKhachHang = N'Đặng Thành Đạt', 
+    SoDienThoai = '0355092704', 
+    Email = 'dat@gmail.com', 
+    DiaChi = N'Hà Nội'
+WHERE TenKhachHang IS NULL;

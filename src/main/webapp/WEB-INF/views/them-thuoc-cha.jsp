@@ -60,7 +60,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Hạn dùng</label>
-                        <select name="hanDung" class="form-select">
+                        <select name="hanDung" class="form-select" required>
                             <option value="">-- Chọn hạn dùng --</option>
                             <c:forEach var="hd" items="${listHanDung}">
                                 <option value="${hd}">${hd}</option>
