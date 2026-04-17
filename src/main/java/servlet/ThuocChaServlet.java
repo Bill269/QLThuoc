@@ -44,7 +44,6 @@ public class ThuocChaServlet extends HttpServlet {
             if ("add_form".equals(action)) {
                 req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
                 req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.setAttribute("listHanDung", chaRepo.getAllHanDung()); // Bổ sung cho CBB
                 req.getRequestDispatcher("/WEB-INF/views/them-thuoc-cha.jsp").forward(req, resp);
                 return;
             }
@@ -54,7 +53,6 @@ public class ThuocChaServlet extends HttpServlet {
                 req.setAttribute("detail_thuoc_cha", chaRepo.getById(id));
                 req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
                 req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.setAttribute("listHanDung", chaRepo.getAllHanDung()); // Bổ sung cho CBB
                 req.getRequestDispatcher("/WEB-INF/views/sua-thuoc-cha.jsp").forward(req, resp);
                 return;
             }
@@ -140,12 +138,10 @@ public class ThuocChaServlet extends HttpServlet {
             if ("update".equals(action)) {
                 req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
                 req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.setAttribute("listHanDung", chaRepo.getAllHanDung());
                 req.getRequestDispatcher("/WEB-INF/views/sua-thuoc-cha.jsp").forward(req, resp);
             } else {
                 req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
                 req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.setAttribute("listHanDung", chaRepo.getAllHanDung());
                 req.getRequestDispatcher("/WEB-INF/views/them-thuoc-cha.jsp").forward(req, resp);
             }
             return;

@@ -235,24 +235,24 @@ public class ThuocChaRepository {
         return list;
     }
 
-    public List<String> getAllHanDung() {
-        List<String> list = new ArrayList<>();
-        // Lấy các giá trị hạn dùng khác nhau, loại bỏ các dòng null hoặc rỗng
-        String sql = "SELECT DISTINCT HAN_DUNG FROM THUOC_CHA " +
-                "WHERE HAN_DUNG IS NOT NULL AND HAN_DUNG <> '' " +
-                "ORDER BY HAN_DUNG ASC";
-
-        try (Connection con = DbConnector.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(rs.getString("HAN_DUNG"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
+//    public List<String> getAllHanDung() {
+//        List<String> list = new ArrayList<>();
+//        // Lấy các giá trị hạn dùng khác nhau, loại bỏ các dòng null hoặc rỗng
+//        String sql = "SELECT DISTINCT HAN_DUNG FROM THUOC_CHA " +
+//                "WHERE HAN_DUNG IS NOT NULL AND HAN_DUNG <> '' " +
+//                "ORDER BY HAN_DUNG ASC";
+//
+//        try (Connection con = DbConnector.getConnection();
+//             Statement st = con.createStatement();
+//             ResultSet rs = st.executeQuery(sql)) {
+//            while (rs.next()) {
+//                list.add(rs.getString("HAN_DUNG"));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
 
     public boolean isTenThuocExists(String tenThuoc, Integer id) {
         // Nếu id != null là đang sửa (Update), ngược lại là thêm mới (Add)

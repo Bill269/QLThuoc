@@ -40,11 +40,13 @@
                         ${detail_thuoc_cha.tinh_trang ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}
                     </span>
                 </li>
-                <li class="list-group-item d-flex justify-content-between">
-                        <strong>Hạn dùng</strong>
-                        <span class="badge ${detail_thuoc_cha.hanDung}">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Hạn dùng:</strong>
+                        <%-- Hiển thị giá trị String (ví dụ: 24 tháng) ra giữa cặp thẻ span --%>
+                        <span class="badge bg-info text-dark">
+                        <i class="fas fa-calendar-alt me-1"></i> ${detail_thuoc_cha.hanDung}
                         </span>
-                </li>
+                    </li>
                     <li class="list-group-item">
                         <div class="fw-bold mb-2">Mô tả chi tiết:</div>
                         <div class="text-secondary ps-2" style="white-space: pre-wrap; line-height: 1.6; border-left: 3px solid #dee2e6;">

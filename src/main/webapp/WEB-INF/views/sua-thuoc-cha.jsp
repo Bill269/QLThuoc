@@ -62,11 +62,28 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Hạn dùng</label>
-                        <select name="hanDung" class="form-select">
+                        <select name="hanDung" id="hanDung" class="form-select" required>
                             <option value="">-- Chọn hạn dùng --</option>
-                            <c:forEach var="hd" items="${listHanDung}">
-                                <option value="${hd}" ${detail_thuoc_cha.hanDung == hd ? 'selected' : ''}>${hd}</option>
-                            </c:forEach>
+
+                            <%-- Danh sách các hạn dùng phổ biến --%>
+                            <option value="12 tháng" ${detail_thuoc_cha.hanDung == '12 tháng' ? 'selected' : ''}>12 tháng</option>
+                            <option value="24 tháng" ${detail_thuoc_cha.hanDung == '24 tháng' ? 'selected' : ''}>24 tháng</option>
+                            <option value="36 tháng" ${detail_thuoc_cha.hanDung == '36 tháng' ? 'selected' : ''}>36 tháng</option>
+                            <option value="48 tháng" ${detail_thuoc_cha.hanDung == '48 tháng' ? 'selected' : ''}>48 tháng</option>
+                            <option value="60 tháng" ${detail_thuoc_cha.hanDung == '60 tháng' ? 'selected' : ''}>60 tháng</option>
+
+                            <%-- LOGIC DỰ PHÒNG: Nếu dữ liệu trong DB là một con số khác (ví dụ: 30 tháng) --%>
+                            <c:set var="isCommon" value="${detail_thuoc_cha.hanDung == '12 tháng' ||
+                                      detail_thuoc_cha.hanDung == '24 tháng' ||
+                                      detail_thuoc_cha.hanDung == '36 tháng' ||
+                                      detail_thuoc_cha.hanDung == '48 tháng' ||
+                                      detail_thuoc_cha.hanDung == '60 tháng'}" />
+
+                            <c:if test="${not empty detail_thuoc_cha.hanDung && !isCommon}">
+                                <option value="${detail_thuoc_cha.hanDung}" selected>
+                                        ${detail_thuoc_cha.hanDung} (Giá trị cũ)
+                                </option>
+                            </c:if>
                         </select>
                     </div>
                 </div>

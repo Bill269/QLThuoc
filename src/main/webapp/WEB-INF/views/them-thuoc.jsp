@@ -8,6 +8,14 @@
             <i class="fas fa-plus-circle me-2"></i> Nhập lô thuốc mới
         </h2>
 
+        <c:if test="${param.error == 'date_too_old'}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Lỗi:</strong> Hạn sử dụng phải lớn hơn ngày hôm nay!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
         <form action="kho?action=insert" method="post">
             <div class="mb-4">
                 <label class="form-label fw-bold">Chọn dược phẩm từ danh mục</label>
@@ -27,7 +35,15 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Hạn sử dụng</label>
-                    <input type="date" name="hanSuDung" class="form-control" required>
+                    <input type="date" name="hanSuDung" id="hanSDAdd"
+                           class="form-control ${param.error == 'date_too_old' ? 'is-invalid' : ''}" required>
+
+                    <%-- Thông báo lỗi ngay dưới ô nhập --%>
+                    <c:if test="${param.error == 'date_too_old'}">
+                        <div class="invalid-feedback" style="display: block;">
+                            Hạn dùng phải lớn hơn ngày hôm nay!
+                        </div>
+                    </c:if>
                 </div>
             </div>
 
@@ -38,5 +54,27 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dateInput = document.getElementById('hanSDAdd');
+
+        // 1. Vẫn chặn lịch để người dùng dễ chọn đúng
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        dateInput.setAttribute('min', tomorrowStr);
+
+        // 2. ÉP THÔNG BÁO TIẾNG VIỆT KHI NHẬP SAI (Xử lý cái bong bóng trong ảnh)
+        dateInput.addEventListener('invalid', function() {
+            this.setCustomValidity('Lỗi: Hạn dùng không hợp lệ!');
+        });
+
+        dateInput.addEventListener('input', function() {
+            this.setCustomValidity(''); // Xóa thông báo khi người dùng bắt đầu sửa lại
+        });
+    });
+</script>
 
 <%@ include file="fragment/footer.jsp" %>

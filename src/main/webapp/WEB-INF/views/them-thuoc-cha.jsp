@@ -62,10 +62,13 @@
                         <label class="form-label fw-bold">Hạn dùng</label>
                         <select name="hanDung" class="form-select" required>
                             <option value="">-- Chọn hạn dùng --</option>
-                            <c:forEach var="hd" items="${listHanDung}">
-                                <option value="${hd}">${hd}</option>
-                            </c:forEach>
+                            <option value="12 tháng">12 tháng</option>
+                            <option value="24 tháng">24 tháng</option>
+                            <option value="36 tháng">36 tháng</option>
+                            <option value="48 tháng">48 tháng</option>
+                            <option value="60 tháng">60 tháng</option>
                         </select>
+                        <small class="text-muted">Chọn thời gian bảo quản mặc định.</small>
                     </div>
                 </div>
 

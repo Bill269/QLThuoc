@@ -151,9 +151,24 @@ public class ThuocServlet extends HttpServlet {
             return;
         }
 
+        // 1. Lấy dữ liệu ngày từ form
+        Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
+        Date today = new Date();
+
+        // 2. Chuyển ngày về dạng số yyyyMMdd để so sánh (Ví dụ: 20260417)
+        SimpleDateFormat sdfCompare = new SimpleDateFormat("yyyyMMdd");
+        int hanSDInt = Integer.parseInt(sdfCompare.format(hanSD));
+        int todayInt = Integer.parseInt(sdfCompare.format(today));
+
+        // 3. Kiểm tra: Hạn dùng phải > Ngày hiện tại
+        if (hanSDInt <= todayInt) {
+            // Nếu nhỏ hơn hoặc bằng thì đá về trang thêm kèm lỗi
+            resp.sendRedirect("kho?action=add&error=date_too_old");
+            return;
+        }
+
         // --- Nếu pass validate thì mới chạy tiếp đoạn code cũ của bạn ---
         int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
-        Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
         ThuocCha tc = new ThuocCha();
         tc.setId(idTenThuoc);
@@ -172,6 +187,13 @@ public class ThuocServlet extends HttpServlet {
         // 1. Lấy ID trước để nếu có lỗi còn biết đường quay lại đúng trang sửa
         int id = Integer.parseInt(req.getParameter("id"));
 
+        // --- BỔ SUNG: Lấy dữ liệu hiện tại từ DB để phục vụ so sánh hạn dùng cũ/mới ---
+        Thuoc currentThuoc = repository.getById(id);
+        if (currentThuoc == null) {
+            resp.sendRedirect("kho?error=not_found");
+            return;
+        }
+
         // 2. Lấy số lượng và kiểm tra
         String soLuongStr = req.getParameter("soLuong");
         int soLuong = 0;
@@ -187,10 +209,29 @@ public class ThuocServlet extends HttpServlet {
             return;
         }
 
-        // --- Nếu pass validate thì thực hiện logic cũ ---
+        // --- BỔ SUNG: LOGIC VALIDATE HẠN DÙNG ---
+        Date hanSDMoi = dateFormat.parse(req.getParameter("hanSuDung"));
+        Date hanSDCu = currentThuoc.getHanSuDung();
+        Date today = new Date();
+
+        SimpleDateFormat sdfCompare = new SimpleDateFormat("yyyyMMdd");
+        int hanMoiInt = Integer.parseInt(sdfCompare.format(hanSDMoi));
+        int hanCuInt = Integer.parseInt(sdfCompare.format(hanSDCu));
+        int todayInt = Integer.parseInt(sdfCompare.format(today));
+
+        // Nếu người dùng thay đổi hạn dùng (Mới khác Cũ)
+        if (hanMoiInt != hanCuInt) {
+            // Thì hạn dùng mới bắt buộc phải LỚN HƠN ngày hiện tại
+            if (hanMoiInt <= todayInt) {
+                resp.sendRedirect("kho?action=edit&id=" + id + "&error=date_too_old");
+                return;
+            }
+        }
+        // Nếu hanMoiInt == hanCuInt -> Chấp nhận (giữ nguyên dữ liệu cũ)
+
+        // --- Nếu pass validate thì thực hiện logic cũ của bạn ---
         int idTenThuoc = Integer.parseInt(req.getParameter("idTenThuoc"));
         Date ngayNhap = dateFormat.parse(req.getParameter("ngayNhap"));
-        Date hanSD = dateFormat.parse(req.getParameter("hanSuDung"));
 
         ThuocCha tc = new ThuocCha();
         tc.setId(idTenThuoc);
@@ -200,7 +241,7 @@ public class ThuocServlet extends HttpServlet {
         thuoc.setThuocCha(tc);
         thuoc.setSoLuongTon(soLuong);
         thuoc.setNgayNhapThuoc(ngayNhap);
-        thuoc.setHanSuDung(hanSD);
+        thuoc.setHanSuDung(hanSDMoi);
 
         repository.update(thuoc);
         resp.sendRedirect("kho?msg=updated");
