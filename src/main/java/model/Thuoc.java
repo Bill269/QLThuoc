@@ -22,13 +22,7 @@ public class Thuoc {
         this.hanSuDung = hanSuDung;
     }
 
-    public Thuoc(ThuocCha thuocCha, int soLuongTon, Date hanSuDung) {
-        this.thuocCha = thuocCha;
-        this.soLuongTon = soLuongTon;
-        this.hanSuDung = hanSuDung;
-    }
-
-    // Getters and Setters giữ nguyên
+    // Getters and Setters...
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public ThuocCha getThuocCha() { return thuocCha; }
@@ -39,6 +33,12 @@ public class Thuoc {
     public void setNgayNhapThuoc(Date ngayNhapThuoc) { this.ngayNhapThuoc = ngayNhapThuoc; }
     public Date getHanSuDung() { return hanSuDung; }
     public void setHanSuDung(Date hanSuDung) { this.hanSuDung = hanSuDung; }
-    public String getTrangThaiThuoc() { return trangThaiThuoc; }
-    public void setTrangThaiThuoc(String trangThaiThuoc) { this.trangThaiThuoc = trangThaiThuoc; }
+
+    public String getTrangThaiThuoc() {
+        return trangThaiThuoc;
+    }
+
+    public void setTrangThaiThuoc(String trangThaiThuoc) {
+        this.trangThaiThuoc = trangThaiThuoc;
+    }
 }

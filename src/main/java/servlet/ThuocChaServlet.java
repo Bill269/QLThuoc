@@ -10,7 +10,6 @@ import model.User;
 import repository.ThuocChaRepository;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/thuoc")
 public class ThuocChaServlet extends HttpServlet {
@@ -30,12 +29,10 @@ public class ThuocChaServlet extends HttpServlet {
         try {
             if ("delete".equals(action)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-
                 if (chaRepo.isThuocDaCoLo(id)) {
                     resp.sendRedirect(req.getContextPath() + "/thuoc?error=has_lots");
                     return;
                 }
-
                 chaRepo.deleteById(id);
                 resp.sendRedirect(req.getContextPath() + "/thuoc?msg=deleted");
                 return;
@@ -83,42 +80,49 @@ public class ThuocChaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
+
+        // Lấy dữ liệu từ form
         String tenThuoc = req.getParameter("tenThuoc");
         String moTa = req.getParameter("moTa");
         String idStr = req.getParameter("id");
-        Integer loai = Integer.parseInt(req.getParameter("loai"));
-        Integer donVi = Integer.parseInt(req.getParameter("donVi"));
-        Boolean tinhTrang = Boolean.parseBoolean(req.getParameter("tinhTrang"));
+        String loaiStr = req.getParameter("loai");
+        String donViStr = req.getParameter("donVi");
+        String giaBanStr = req.getParameter("giaBan");
+        String tinhTrangStr = req.getParameter("tinhTrang");
         String hanDung = req.getParameter("hanDung");
 
-        // Ép kiểu giá bán để kiểm tra
+        Integer currentId = (idStr != null && !idStr.isEmpty()) ? Integer.parseInt(idStr) : null;
+        Integer loai = (loaiStr != null) ? Integer.parseInt(loaiStr) : 0;
+        Integer donVi = (donViStr != null) ? Integer.parseInt(donViStr) : 0;
+        Boolean tinhTrang = Boolean.parseBoolean(tinhTrangStr);
+
         Double giaBan = 0.0;
         try {
-            giaBan = Double.parseDouble(req.getParameter("giaBan"));
+            giaBan = Double.parseDouble(giaBanStr);
         } catch (Exception e) { giaBan = -1.0; }
 
         String error = null;
-        String regex = "^[a-zA-Z0-9A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂÂÊÔƠƯÀẢÃẠẰẮẲẴẶẦẤẨẪẬÈẺẼẸỀẾỂỄỆÌỈĨỊÒỎÕỌỜỚỞỠỢỒỐỔỖỘÙỦŨỤỪỨỬỮỰỲỶỸỴ\\s,().\\-]+$"; // Không khoảng trắng, không ký tự đặc biệt
-        Integer currentId = (idStr != null && !idStr.isEmpty()) ? Integer.parseInt(idStr) : null;
 
-        // --- BỘ LỌC VALIDATE THEO THỨ TỰ ƯU TIÊN ---
+        // REGEX CẢI TIẾN: Hỗ trợ toàn bộ tiếng Việt, số, khoảng trắng và các dấu cơ bản (.,()-)
+        // Lưu ý: \p{L} là đại diện cho bất kỳ chữ cái nào trong Unicode (bao gồm tiếng Việt)
+        String regex = "^[\\p{L}0-9\\s,().\\-]+$";
 
         // 1. Validate Tên Thuốc
         if (tenThuoc == null || tenThuoc.trim().isEmpty()) {
             error = "Tên dược phẩm không được để trống!";
-        } else if (chaRepo.isTenThuocExists(tenThuoc, currentId)) {
-            error = "Tên dược phẩm này đã tồn tại!";
         } else if (tenThuoc.length() < 5 || tenThuoc.length() > 40) {
             error = "Tên phải từ 5 đến 40 ký tự!";
         } else if (!tenThuoc.matches(regex)) {
             error = "Tên không được chứa ký tự đặc biệt!";
+        } else if (chaRepo.isTenThuocExists(tenThuoc, currentId)) {
+            error = "Tên dược phẩm này đã tồn tại!";
         }
 
-        // 2. Validate Mô tả (Nếu tên đã pass thì check tiếp mô tả)
+        // 2. Validate Mô tả
         else if (moTa == null || moTa.trim().isEmpty()) {
             error = "Mô tả không được để trống!";
-        } else if (moTa.length() < 5 || moTa.length() > 40) {
-            error = "Mô tả phải từ 5 đến 40 ký tự!";
+        } else if (moTa.length() < 5 || moTa.length() > 255) { // Tăng giới hạn mô tả cho thoải mái
+            error = "Mô tả phải từ 5 đến 255 ký tự!";
         } else if (!moTa.matches(regex)) {
             error = "Mô tả không được chứa ký tự đặc biệt!";
         }
@@ -128,26 +132,19 @@ public class ThuocChaServlet extends HttpServlet {
             error = "Giá bán mặc định phải lớn hơn 0!";
         }
 
-        // Nếu có lỗi, quay lại form và hiển thị thông báo
         if (error != null) {
             req.setAttribute("error", error);
-            // Giữ lại dữ liệu cũ để người dùng không phải nhập lại
-            req.setAttribute("detail_thuoc_cha", new ThuocCha(currentId != null ? currentId : 0, tenThuoc, loai, donVi, giaBan, tinhTrang, hanDung, moTa, null, null));
+            // Gán dữ liệu vào object để hiển thị lại trên form (Tránh mất công nhập lại)
+            ThuocCha tcOld = new ThuocCha(currentId != null ? currentId : 0, tenThuoc, loai, donVi, giaBan, tinhTrang, hanDung, moTa, null, null);
+            req.setAttribute("detail_thuoc_cha", tcOld);
+            req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
+            req.setAttribute("donVi", chaRepo.getAllDonViTinh());
 
-            // Quay lại đúng form tương ứng
-            if ("update".equals(action)) {
-                req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
-                req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.getRequestDispatcher("/WEB-INF/views/sua-thuoc-cha.jsp").forward(req, resp);
-            } else {
-                req.setAttribute("loai", chaRepo.getAllLoaiThuoc());
-                req.setAttribute("donVi", chaRepo.getAllDonViTinh());
-                req.getRequestDispatcher("/WEB-INF/views/them-thuoc-cha.jsp").forward(req, resp);
-            }
+            String path = "update".equals(action) ? "/WEB-INF/views/sua-thuoc-cha.jsp" : "/WEB-INF/views/them-thuoc-cha.jsp";
+            req.getRequestDispatcher(path).forward(req, resp);
             return;
         }
 
-        // --- NẾU KHÔNG CÓ LỖI THÌ GIỮ NGUYÊN LOGIC CŨ CỦA BẠN ---
         try {
             if ("update".equals(action)) {
                 ThuocCha tc = new ThuocCha(currentId, tenThuoc, loai, donVi, giaBan, tinhTrang, hanDung, moTa, null, null);
