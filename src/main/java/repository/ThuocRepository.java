@@ -181,4 +181,14 @@ public class ThuocRepository {
         } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
+    public void updateSoLuongTon(int idThuoc, int soLuongMua) throws Exception {
+        // Trừ số lượng: SO_LUONG_TON mới = SO_LUONG_TON cũ - soLuongMua
+        String sql = "UPDATE THUOC SET SO_LUONG_TON = SO_LUONG_TON - ? WHERE ID = ?";
+        try (Connection con = DbConnector.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, soLuongMua);
+            ps.setInt(2, idThuoc);
+            ps.executeUpdate();
+        }
+    }
 }

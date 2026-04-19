@@ -167,11 +167,15 @@ public class BanHangServlet extends HttpServlet {
             User user = (User) session.getAttribute("currentUser");
             int userId = (user != null) ? user.getId() : 1;
             int idHD = hdRepo.createHoaDon(userId, tenKH, sdt, email, diaChi);
+            // Trong doPost của BanHangServlet
             if (idHD > 0) {
                 for (GioHangItem item : cart.values()) {
-                    hdRepo.addChiTiet(idHD, item.getThuoc().getId(), item.getSoLuong(), item.getThuoc().getThuocCha().getGiaBanMacDinh());
+                    hdRepo.addChiTiet(idHD, item.getThuoc().getId(), item.getSoLuong(),
+                            item.getThuoc().getThuocCha().getGiaBanMacDinh());
+
+                    repo.updateSoLuongTon(item.getThuoc().getId(), item.getSoLuong());
                 }
-                session.setAttribute("message", "Thanh toán thành công!");
+                session.setAttribute("message", "Thanh toán thành công và đã trừ kho!");
                 session.setAttribute("messageType", "success");
                 cart.clear();
             }

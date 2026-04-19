@@ -11,8 +11,8 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
         <junit.version>5.7.0</junit.version>
     </properties>
 
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>5.0.0</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>10.2.1.jre8</version>
+            <version>12.2.0.jre11</version>
         </dependency>
 
         <dependency>
