@@ -26,7 +26,7 @@
 
             <%-- QUAN TRỌNG: Phải có ô Ngày Nhập để Servlet không bị lỗi Null --%>
             <div class="mb-3">
-                <label class="form-label fw-bold">Ngày nhập thuốc (Có thể sửa)</label>
+                <label class="form-label fw-bold">Ngày nhập thuốc</label>
                 <fmt:formatDate value="${thuocToEdit.ngayNhapThuoc}" pattern="yyyy-MM-dd" var="fmtNgayNhap" />
                 <input type="date" name="ngayNhap" value="${fmtNgayNhap}" class="form-control" required>
                 <small class="text-muted">Giữ nguyên hoặc sửa lại ngày nhập kho.</small>
@@ -40,11 +40,9 @@
 
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Hạn sử dụng</label>
-
                     <fmt:formatDate value="${thuocToEdit.hanSuDung}" pattern="yyyy-MM-dd" var="fmtHSD" />
-
                     <input type="date" name="hanSuDung" id="hanSuDungEdit" value="${fmtHSD}"
-                           class="form-control ${param.error == 'date_too_old' ? 'is-invalid' : ''}" required>
+                           class="form-control bg-light" readonly style="cursor: not-allowed;">
                 </div>
             </div>
 
