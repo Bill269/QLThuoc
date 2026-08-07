@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @WebServlet("/send-email")
 public class EmailServlet extends HttpServlet {
 
-    private final String GMAIL_USERNAME = "manhttth04996@gmail.com";
-    private final String GMAIL_APP_PASSWORD = "oxzv hlia biae ggmu";
+    private final String GMAIL_USERNAME = "123432@gmail.com";
+    private final String GMAIL_APP_PASSWORD = "AppPassword";
 
     @Override
     public void init() throws ServletException {
